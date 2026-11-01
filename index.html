@@ -10,6 +10,10 @@
   <main id="app">
 
     <div class="topbar">
+      <button id="btn-avatar" class="avatar-btn" type="button" aria-label="Open the locker room">
+        <span id="topbar-avatar" class="topbar-avatar"></span>
+        <span class="avatar-btn-label">Locker</span>
+      </button>
       <div id="gold" class="gold-counter" role="status" aria-label="Gold coins">
         <svg class="coin" viewBox="0 0 40 40" aria-hidden="true">
           <defs>
@@ -38,7 +42,10 @@
       <h1>Rounding Hoops <span aria-hidden="true">🏀</span></h1>
       <p class="lead">Round the number to score a basket! Score 7 out of 10 to unlock the next level.</p>
       <div id="level-list" class="level-list"></div>
-      <button id="btn-trophies" class="btn trophy-btn" type="button">🏆 Trophy Room <span id="trophy-count"></span></button>
+      <div class="home-buttons">
+        <button id="btn-locker" class="btn locker-btn" type="button">👕 Locker Room</button>
+        <button id="btn-trophies" class="btn trophy-btn" type="button">🏆 Trophy Room <span id="trophy-count"></span></button>
+      </div>
     </section>
 
     <!-- Play -->
@@ -60,6 +67,7 @@
           <path d="M205 53 L211 72 L233 72 L239 53" fill="none" stroke="#ccc" stroke-width="1.5"/>
           <path d="M211 72 L222 53 L233 72 M216 72 L206 54 M228 72 L238 54" fill="none" stroke="#ccc" stroke-width="1"/>
         </svg>
+        <div id="court-player" class="court-player"></div>
         <div id="ball" class="ball">🏀</div>
       </div>
 
@@ -102,11 +110,24 @@
       <div id="trophy-shelf" class="shelf trophy-shelf"></div>
     </section>
 
+    <!-- Locker room: avatar and shop -->
+    <section id="screen-locker" class="screen">
+      <button id="btn-locker-back" class="link-btn" type="button">← Levels</button>
+      <h2>Locker Room 👕</h2>
+      <p class="lead">Spend your gold on new gear. Tap an item to try it on.</p>
+      <div class="locker-stage">
+        <div id="locker-avatar" class="locker-avatar"></div>
+      </div>
+      <div id="slot-tabs" class="slot-tabs" role="tablist"></div>
+      <div id="item-grid" class="item-grid"></div>
+    </section>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   </main>
   <script src="js/rounding.js"></script>
   <script src="js/achievements.js"></script>
+  <script src="js/avatar.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

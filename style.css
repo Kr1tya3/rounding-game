@@ -121,8 +121,9 @@ h1 { font-size: 2rem; }
 .court-svg { width: 100%; height: auto; display: block; }
 .ball {
   position: absolute;
-  left: 8%;
-  top: 62%;
+  left: 21%;
+  top: 58%;
+  z-index: 2;
   font-size: 2.2rem;
   line-height: 1;
   transform: translate(-50%, -50%);
@@ -131,13 +132,13 @@ h1 { font-size: 2rem; }
 .ball.shot-miss { animation: shot-miss 1s ease-in-out forwards; }
 
 @keyframes shot-in {
-  0%   { left: 8%;  top: 62%; }
+  0%   { left: 21%; top: 58%; }
   50%  { left: 45%; top: 0%; }
   80%  { left: 74%; top: 26%; }
   100% { left: 74%; top: 72%; }
 }
 @keyframes shot-miss {
-  0%   { left: 8%;  top: 62%; }
+  0%   { left: 21%; top: 58%; }
   50%  { left: 45%; top: 0%; }
   75%  { left: 82%; top: 22%; }
   100% { left: 96%; top: 72%; }
@@ -274,3 +275,69 @@ h1 { font-size: 2rem; }
 @media (prefers-reduced-motion: reduce) {
   .gold-counter.bump .coin, .gold-counter.bump .gold-count, .gold-pop.show { animation: none; }
 }
+
+/* Player on the court */
+.court-player { position: absolute; left: 2%; bottom: 16.7%; height: 55%; aspect-ratio: 100 / 140; }
+.court-player svg { width: 100%; height: 100%; display: block; }
+
+/* Top bar avatar button */
+.topbar { justify-content: space-between; align-items: center; }
+.avatar-btn {
+  font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  background: var(--panel); color: var(--ink); border: 3px solid var(--primary);
+  border-radius: 999px; padding: 3px 14px 3px 3px; font-weight: 800;
+  box-shadow: 0 4px 0 #b8460a;
+}
+.topbar-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #ffe8cc; display: block; }
+.topbar-avatar svg { width: 100%; height: 100%; display: block; }
+
+.home-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.home-buttons .trophy-btn { margin-top: 0; }
+.locker-btn { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+
+/* Locker room */
+.locker-stage {
+  display: flex; justify-content: center; margin: 8px 0 12px; padding: 12px 0 0;
+  background: radial-gradient(ellipse at 50% 95%, rgba(0,0,0,0.12) 0 22%, transparent 23%),
+              linear-gradient(180deg, #ffe8cc 0%, #ffd8a8 100%);
+  border-radius: 20px; border: 3px solid var(--border);
+}
+.big-avatar { width: 150px; height: auto; display: block; }
+.slot-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.slot-tab {
+  font: inherit; font-weight: 700; font-size: 0.95rem; white-space: nowrap; cursor: pointer;
+  padding: 8px 12px; border-radius: 999px; border: 2px solid var(--border);
+  background: var(--panel); color: var(--ink);
+}
+.slot-tab.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.item-card {
+  display: flex; flex-direction: column; border-radius: 14px; background: var(--panel);
+  border: 3px solid var(--border); overflow: hidden;
+}
+.item-card.wearing { border-color: var(--good); }
+.item-card.trying { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.2); }
+.item-pick {
+  font: inherit; color: var(--ink); background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 4px;
+}
+.item-preview { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.item-svg { width: 100%; height: 100%; }
+.swatch { width: 48px; height: 48px; border-radius: 50%; border: 3px solid rgba(0,0,0,0.15); display: block; }
+.none-mark { font-size: 2rem; color: var(--muted); }
+.item-name { font-weight: 800; font-size: 0.9rem; text-align: center; }
+.item-foot { padding: 4px 6px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 40px; justify-content: center; }
+.tag { font-size: 0.8rem; color: var(--muted); font-weight: 700; }
+.wearing-tag { color: var(--good); }
+.buy-btn {
+  font: inherit; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 999px; border: 2px solid #b37400;
+  background: linear-gradient(180deg, #ffe066, #f2b705); color: #5c3d00;
+}
+.buy-btn:disabled { cursor: default; filter: grayscale(0.8); opacity: 0.6; }
+.mini-coin {
+  width: 14px; height: 14px; border-radius: 50%; display: inline-block;
+  background: radial-gradient(circle at 35% 35%, #fff6c2 0 20%, #ffd23f 21% 60%, #e09b00 61%);
+  border: 1.5px solid #b37400;
+}
+.need { font-size: 0.72rem; color: var(--muted); }
