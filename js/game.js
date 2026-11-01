@@ -6,6 +6,7 @@
   var A = window.Achievements;
   var AV = window.Avatar;
   var N = window.Names;
+  var K = window.Ranks;
   var STORAGE_KEY = "roundingHoops.v1";
 
   var state = {
@@ -26,7 +27,7 @@
 
   // ---------- Saved progress (this device only) ----------
   function loadProgress() {
-    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {}, gold: 0, goldEarned: 0 };
+    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {}, gold: 0, goldEarned: 0, games: [] };
     try {
       var data = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (data && typeof data.unlocked === "number") {
@@ -39,6 +40,7 @@
         p.avatar = data.avatar;
         p.name = data.name;
         p.trialBest = data.trialBest || 0;
+        p.games = Array.isArray(data.games) ? data.games : [];
       }
     } catch (e) { /* storage blocked or empty */ }
     p.avatar = AV.normalise(p.avatar);
@@ -93,6 +95,7 @@
     $("trial-best").innerHTML = progress.trialBest
       ? "Best<b>" + progress.trialBest + "</b>"
       : "New!";
+    renderRank();
     var won = Object.keys(progress.trophies).length;
     $("trophy-count").textContent = "(" + won + "/" + A.TROPHIES.length + ")";
   }
@@ -218,6 +221,7 @@
     var bestBonus = isBest ? R.TRIAL.bestBonus : 0;
     if (isBest) progress.trialBest = state.score;
     if (bestBonus) addGold(bestBonus);
+    var rankChange = recordGame(state.score, state.score + state.trialMisses, state.score * R.TRIAL.gold + bestBonus);
     state.newTrophies = state.newTrophies.concat(
       A.awardTrophies(progress, { streak: state.streak, trialScore: state.score }));
     saveProgress(progress);
@@ -233,6 +237,7 @@
       (bestBonus ? '<div class="pay-row"><span>🎉 Personal best bonus</span><b>+' + bestBonus + "</b></div>" : "") +
       (state.trialMisses ? '<div class="pay-row"><span>❌ ' + state.trialMisses + (state.trialMisses === 1 ? " miss" : " misses") + "</span><b>−" + (state.trialMisses * R.TRIAL.penalty) + "s</b></div>" : "") +
       '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(trialGold + bestBonus) + "</b></div>";
+    renderResultRank(rankChange);
     $("result-msg").textContent = "Accuracy beats speed: every wrong answer takes " + R.TRIAL.penalty + " seconds off the clock, so think before you tap!";
     renderNewTrophies();
     $("btn-next-level").style.display = "none";
@@ -408,6 +413,7 @@
     var medal = A.medalFor(state.score);
     var bonus = A.medalBonus(medal, lvl);
     if (bonus) addGold(bonus);
+    var rankChange = recordGame(state.score, R.QUESTIONS_PER_ROUND, state.score * lvl.gold + state.speedGold + bonus);
     var roundTrophies = A.awardTrophies(progress, { streak: state.streak, roundScore: state.score });
     state.newTrophies = state.newTrophies.concat(roundTrophies);
     saveProgress(progress);
@@ -425,6 +431,7 @@
       (state.speedGold ? '<div class="pay-row"><span>⚡ Speed bonuses</span><b>+' + R.formatNumber(state.speedGold) + "</b></div>" : "") +
       (bonus ? '<div class="pay-row"><span>' + medal.icon + " " + medal.name + " medal bonus</span><b>+" + R.formatNumber(bonus) + "</b></div>" : "") +
       '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(basketGold + state.speedGold + bonus) + "</b></div>";
+    renderResultRank(rankChange);
     renderNewTrophies();
 
     $("result-title").textContent = passed
@@ -441,6 +448,59 @@
     var hasNext = lvl.id < R.LEVELS.length && lvl.id + 1 <= progress.unlocked;
     $("btn-next-level").style.display = hasNext ? "" : "none";
     show("screen-result");
+  }
+
+  // ---------- Rank ----------
+  // Records a finished game and returns the rank before and after it.
+  function recordGame(right, answered, gold) {
+    var before = K.rating(progress.games);
+    K.recordGame(progress, { right: right, answered: answered, gold: gold });
+    var after = K.rating(progress.games);
+    renderAvatars();
+    return { before: before, after: after, up: K.RANKS.indexOf(after.rank) > K.RANKS.indexOf(before.rank) };
+  }
+
+  function rankLadder(current) {
+    return '<div class="rank-ladder" aria-hidden="true">' + K.RANKS.map(function (r) {
+      var cls = r === current ? " current" : K.RANKS.indexOf(r) < K.RANKS.indexOf(current) ? " passed" : "";
+      return '<span class="rank-step' + cls + '" title="' + r.name + '">' + r.icon + "</span>";
+    }).join("") + "</div>";
+  }
+
+  function renderRank() {
+    var r = K.rating(progress.games);
+    var card = $("rank-card");
+    var detail;
+    if (!r.games) {
+      detail = "Play a game to start climbing the ranks!";
+    } else {
+      detail = "Last " + (r.games === 1 ? "game" : r.games + " games") + ": " +
+        r.accuracy + "% right, " + R.formatNumber(r.gold) + " gold a game";
+    }
+    var toNext = r.next
+      ? '<div class="rank-bar"><span style="width:' + Math.round(100 * (r.points - r.rank.min) / (r.next.min - r.rank.min)) + '%"></span></div>' +
+        '<span class="rank-next">' + (r.next.min - r.points) + (r.next.min - r.points === 1 ? " point" : " points") + " to " + r.next.icon + " " + r.next.name + "</span>"
+      : '<span class="rank-next">Top rank! Keep it up to stay a Legend.</span>';
+    card.className = "rank-card rank-" + r.rank.id;
+    card.innerHTML =
+      '<span class="rank-icon" aria-hidden="true">' + r.rank.icon + "</span>" +
+      '<span class="rank-text">' +
+        '<span class="rank-label">Your rank</span>' +
+        '<span class="rank-name">' + r.rank.name + "</span>" +
+        '<span class="rank-detail">' + detail + "</span>" +
+        toNext +
+      "</span>" +
+      '<span class="rank-points"><b>' + r.points + "</b>points</span>" +
+      rankLadder(r.rank);
+  }
+
+  function renderResultRank(change) {
+    var a = change.after;
+    $("result-rank").innerHTML = change.up
+      ? '<div class="rank-up"><span class="medal-big">' + a.rank.icon + "</span>Rank up! You're now a <b>" + a.rank.name + "</b>!</div>"
+      : '<div class="rank-line">Rank: ' + a.rank.icon + " <b>" + a.rank.name + "</b> · " + a.points + " points" +
+        (a.next ? " (" + a.next.name + " at " + a.next.min + ")" : "") + "</div>";
+    if (change.up) showToast('<span class="toast-icon">' + a.rank.icon + "</span> Rank up: <b>" + a.rank.name + "</b>!");
   }
 
   // ---------- Trophy room ----------
@@ -481,6 +541,8 @@
   function renderAvatars() {
     var look = progress.avatar.look;
     $("topbar-name").textContent = progress.name;
+    var rank = K.rating(progress.games).rank;
+    $("topbar-rank").textContent = rank.icon + " " + rank.name;
     $("btn-avatar").setAttribute("aria-label", progress.name + ": open the locker room");
     $("topbar-avatar").innerHTML = AV.svg(look, { viewBox: "26 4 48 48" });
     $("court-player").innerHTML = AV.svg(look);

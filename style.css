@@ -418,3 +418,30 @@ h1 { font-size: 2rem; }
   100% { opacity: 0; transform: translateY(-14px) scale(1); }
 }
 .clock.trial.penalised .clock-fill { background: var(--bad); }
+
+/* Player rank */
+.avatar-btn-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; text-align: left; }
+.topbar-rank { font-size: 0.72rem; font-weight: 800; color: var(--muted); white-space: nowrap; }
+.rank-card {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 12px;
+  margin-top: 16px; padding: 12px 16px; border-radius: 16px;
+  background: var(--panel); border: 3px solid var(--border);
+}
+.rank-icon { font-size: 2.4rem; }
+.rank-text { display: flex; flex-direction: column; min-width: 0; }
+.rank-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.rank-name { font-weight: 900; font-size: 1.3rem; }
+.rank-detail, .rank-next { font-size: 0.85rem; color: var(--muted); }
+.rank-bar { height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; margin: 6px 0 2px; }
+.rank-bar span { display: block; height: 100%; border-radius: 999px; background: var(--primary); }
+.rank-points { display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--muted); }
+.rank-points b { font-size: 1.6rem; color: var(--ink); }
+.rank-ladder { grid-column: 1 / -1; display: flex; justify-content: space-between; margin-top: 6px; }
+.rank-step { font-size: 1.3rem; width: 2.2rem; height: 2.2rem; display: grid; place-items: center; border-radius: 50%; background: var(--border); opacity: 0.45; filter: grayscale(1); }
+.rank-step.passed { opacity: 0.85; filter: none; }
+.rank-step.current { opacity: 1; filter: none; background: var(--primary); box-shadow: 0 0 0 3px #ffd8a8; transform: scale(1.12); }
+.rank-legend { border-color: #f2b705; background: linear-gradient(135deg, var(--panel), #fff3bf55); }
+.rank-star { border-color: #fcc419; }
+.result-rank { text-align: center; margin: 10px 0; }
+.rank-line { color: var(--muted); }
+.rank-up { font-size: 1.2rem; font-weight: 800; color: var(--primary); }

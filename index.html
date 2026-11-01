@@ -12,7 +12,10 @@
     <div class="topbar">
       <button id="btn-avatar" class="avatar-btn" type="button" aria-label="Open the locker room">
         <span id="topbar-avatar" class="topbar-avatar"></span>
-        <span id="topbar-name" class="avatar-btn-label"></span>
+        <span class="avatar-btn-text">
+          <span id="topbar-name" class="avatar-btn-label"></span>
+          <span id="topbar-rank" class="topbar-rank"></span>
+        </span>
       </button>
       <div id="gold" class="gold-counter" role="status" aria-label="Gold coins">
         <svg class="coin" viewBox="0 0 40 40" aria-hidden="true">
@@ -41,6 +44,7 @@
     <section id="screen-home" class="screen active">
       <h1>Rounding Hoops <span aria-hidden="true">🏀</span></h1>
       <p class="lead">Round the number to score a basket! Score 7 out of 10 to unlock the next level.</p>
+      <div id="rank-card" class="rank-card"></div>
       <button id="btn-trial" class="trial-card" type="button">
         <span class="trial-icon" aria-hidden="true">⏱️</span>
         <span class="trial-text">
@@ -105,6 +109,7 @@
       <p id="result-score" class="result-score"></p>
       <p id="result-medal" class="result-medal"></p>
       <div id="result-gold" class="result-gold"></div>
+      <div id="result-rank" class="result-rank"></div>
       <p id="result-msg"></p>
       <div id="result-new" class="result-new"></div>
       <div class="result-actions">
@@ -153,6 +158,7 @@
   <script src="js/achievements.js"></script>
   <script src="js/avatar.js"></script>
   <script src="js/names.js"></script>
+  <script src="js/ranks.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>
