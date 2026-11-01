@@ -2,6 +2,8 @@
 (function (root) {
   "use strict";
 
+  var LEVEL_COUNT = 8;
+
   // Medal for a level from the best score out of 10.
   var MEDALS = [
     { id: "gold", min: 10, name: "Gold", icon: "🥇" },
@@ -35,11 +37,15 @@
       test: function (p) { return passed(p, 3) && passed(p, 4); } },
     { id: "thousands-champ", icon: "🏆", name: "Thousands Champion", desc: "Pass both thousands levels.",
       test: function (p) { return passed(p, 5) && passed(p, 6); } },
+    { id: "mixed-champ", icon: "🌟", name: "Mixed Master", desc: "Pass both mixed levels.",
+      test: function (p) { return passed(p, 7) && passed(p, 8); } },
+    { id: "treasure-chest", icon: "💰", name: "Treasure Chest", desc: "Collect 500 gold.",
+      test: function (p) { return (p.gold || 0) >= 500; } },
     { id: "century", icon: "💯", name: "Century", desc: "Score 100 baskets in total.",
       test: function (p) { return p.totalBaskets >= 100; } },
     { id: "hall-of-fame", icon: "👑", name: "Hall of Fame", desc: "Win a gold medal on every level.",
       test: function (p) {
-        for (var id = 1; id <= 6; id++) if (bestOf(p, id) !== 10) return false;
+        for (var id = 1; id <= LEVEL_COUNT; id++) if (bestOf(p, id) !== 10) return false;
         return true;
       } }
   ];

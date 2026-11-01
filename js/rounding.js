@@ -9,8 +9,14 @@
     { id: 3, unit: 100, mode: "pick", name: "Hundreds", stage: "Pick the answer" },
     { id: 4, unit: 100, mode: "type", name: "Hundreds", stage: "Type the answer" },
     { id: 5, unit: 1000, mode: "pick", name: "Thousands", stage: "Pick the answer" },
-    { id: 6, unit: 1000, mode: "type", name: "Thousands", stage: "Type the answer" }
+    { id: 6, unit: 1000, mode: "type", name: "Thousands", stage: "Type the answer" },
+    // Mixed: a number in the thousands, rounded to the nearest ten, hundred or thousand.
+    { id: 7, unit: "mixed", mode: "pick", name: "Mixed", stage: "Pick the answer" },
+    { id: 8, unit: "mixed", mode: "type", name: "Mixed", stage: "Type the answer" }
   ];
+
+  var MIXED_UNITS = [10, 100, 1000];
+  var GOLD_PER_BASKET = 10;
 
   var QUESTIONS_PER_ROUND = 10;
   var PASS_MARK = 7;
@@ -52,17 +58,44 @@
     return shuffle([lower, upper, extra], rand);
   }
 
+  // Mixed choices: the answer, the other neighbouring multiple, and the number
+  // rounded to a different place (the classic mix-up), e.g. 4,576 to the nearest
+  // ten: 4,580 / 4,570 / 4,600.
+  function makeMixedChoices(n, unit, rand) {
+    var answer = roundTo(n, unit);
+    var lower = Math.floor(n / unit) * unit;
+    var other = answer === lower ? lower + unit : lower;
+    var choices = [answer, other];
+    var candidates = shuffle(MIXED_UNITS.filter(function (u) { return u !== unit; }), rand)
+      .map(function (u) { return roundTo(n, u); })
+      .concat([lower - unit, lower + 2 * unit]);
+    for (var i = 0; i < candidates.length && choices.length < 3; i++) {
+      var c = candidates[i];
+      if (c > 0 && choices.indexOf(c) === -1) choices.push(c);
+    }
+    return shuffle(choices, rand);
+  }
+
   function makeQuestion(level, rand) {
     rand = rand || Math.random;
-    var n = pickNumber(level.unit, rand);
+    var mixed = level.unit === "mixed";
+    var unit = mixed ? MIXED_UNITS[Math.floor(rand() * MIXED_UNITS.length)] : level.unit;
+    // Mixed numbers are always in the thousands and never end in 0.
+    var n;
+    if (mixed) {
+      do { n = randInt(1001, 9999, rand); } while (n % 10 === 0);
+    } else {
+      n = pickNumber(unit, rand);
+    }
+    var lower = Math.floor(n / unit) * unit;
     var q = {
       number: n,
-      unit: level.unit,
-      answer: roundTo(n, level.unit),
-      lower: Math.floor(n / level.unit) * level.unit,
-      upper: Math.floor(n / level.unit) * level.unit + level.unit
+      unit: unit,
+      answer: roundTo(n, unit),
+      lower: lower,
+      upper: lower + unit
     };
-    if (level.mode === "pick") q.choices = makeChoices(n, level.unit, rand);
+    if (level.mode === "pick") q.choices = mixed ? makeMixedChoices(n, unit, rand) : makeChoices(n, unit, rand);
     return q;
   }
 
@@ -81,6 +114,7 @@
     LEVELS: LEVELS,
     QUESTIONS_PER_ROUND: QUESTIONS_PER_ROUND,
     PASS_MARK: PASS_MARK,
+    GOLD_PER_BASKET: GOLD_PER_BASKET,
     roundTo: roundTo,
     makeQuestion: makeQuestion,
     parseAnswer: parseAnswer,

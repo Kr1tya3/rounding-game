@@ -16,14 +16,21 @@ test("questions are in range and choices contain the answer", () => {
   for (const level of R.LEVELS) {
     for (let i = 0; i < 2000; i++) {
       const q = R.makeQuestion(level);
-      assert.ok(q.number > level.unit && q.number < level.unit * 10);
-      assert.notStrictEqual(q.number % level.unit, 0);
-      assert.strictEqual(q.answer, R.roundTo(q.number, level.unit));
+      if (level.unit === "mixed") {
+        assert.ok([10, 100, 1000].includes(q.unit));
+        assert.ok(q.number > 1000 && q.number < 10000);
+        assert.notStrictEqual(q.number % 10, 0);
+      } else {
+        assert.strictEqual(q.unit, level.unit);
+        assert.ok(q.number > level.unit && q.number < level.unit * 10);
+        assert.notStrictEqual(q.number % level.unit, 0);
+      }
+      assert.strictEqual(q.answer, R.roundTo(q.number, q.unit));
       if (level.mode === "pick") {
         assert.strictEqual(q.choices.length, 3);
         assert.strictEqual(new Set(q.choices).size, 3);
         assert.ok(q.choices.includes(q.answer));
-        assert.ok(q.choices.every((c) => c > 0 && c % level.unit === 0));
+        assert.ok(q.choices.every((c) => c > 0 && c % 10 === 0));
       } else {
         assert.strictEqual(q.choices, undefined);
       }
@@ -41,4 +48,10 @@ test("parseAnswer accepts commas and spaces", () => {
 test("formatNumber adds thousands separators", () => {
   assert.strictEqual(R.formatNumber(10000), "10,000");
   assert.strictEqual(R.formatNumber(950), "950");
+});
+
+test("mixed levels use all three places", () => {
+  const seen = new Set();
+  for (let i = 0; i < 300; i++) seen.add(R.makeQuestion(R.LEVELS[6]).unit);
+  assert.deepStrictEqual([...seen].sort((a, b) => a - b), [10, 100, 1000]);
 });

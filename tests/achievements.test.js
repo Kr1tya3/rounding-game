@@ -32,8 +32,16 @@ test("streak, perfect game and champion trophies", () => {
 
 test("hall of fame needs gold everywhere", () => {
   const p = fresh();
-  p.best = { 1: 10, 2: 10, 3: 10, 4: 10, 5: 10, 6: 9 };
+  p.best = { 1: 10, 2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 10, 8: 9 };
   assert.ok(!ids(A.awardTrophies(p, {})).includes("hall-of-fame"));
-  p.best[6] = 10;
+  p.best[8] = 10;
   assert.deepStrictEqual(ids(A.awardTrophies(p, {})), ["hall-of-fame"]);
+});
+
+test("treasure chest at 500 gold", () => {
+  const p = fresh();
+  p.gold = 490;
+  assert.ok(!ids(A.awardTrophies(p, {})).includes("treasure-chest"));
+  p.gold = 500;
+  assert.deepStrictEqual(ids(A.awardTrophies(p, {})), ["treasure-chest"]);
 });
