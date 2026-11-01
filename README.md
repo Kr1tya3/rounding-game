@@ -14,6 +14,7 @@ Play online at https://kr1tya3.github.io/rounding-game/, or open `index.html` in
 - A wrong answer shows a number line explaining which multiple is closer. Halfway numbers round up.
 - A Locker Room where players spend gold on gear, in tiers from Rookie (100–250) through Pro, All-Star and Legend (up to 10,000) for their avatar (jerseys, hats, glasses, shoes, extras). The avatar appears on the court as the shooter.
 - Medals for each level (bronze 7+, silver 9+, gold 10) and eleven trophies, all shown in the Trophy Room.
+- Each player gets a random funny name (e.g. "Bouncy Badger"), which they can re-roll or change in the Locker Room. No sign-up needed.
 - Progress is saved in the browser on that device (no accounts).
 
 ## Tests

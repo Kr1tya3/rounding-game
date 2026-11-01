@@ -12,7 +12,7 @@
     <div class="topbar">
       <button id="btn-avatar" class="avatar-btn" type="button" aria-label="Open the locker room">
         <span id="topbar-avatar" class="topbar-avatar"></span>
-        <span class="avatar-btn-label">Locker</span>
+        <span id="topbar-name" class="avatar-btn-label"></span>
       </button>
       <div id="gold" class="gold-counter" role="status" aria-label="Gold coins">
         <svg class="coin" viewBox="0 0 40 40" aria-hidden="true">
@@ -119,6 +119,15 @@
       <div class="locker-stage">
         <div id="locker-avatar" class="locker-avatar"></div>
       </div>
+      <form id="name-form" class="name-form" autocomplete="off">
+        <label for="name-input" class="name-label">Your player's name</label>
+        <div class="name-row">
+          <input id="name-input" type="text" maxlength="20" spellcheck="false">
+          <button id="btn-random-name" class="btn dice-btn" type="button" aria-label="Pick a random name" title="Pick a random name">🎲</button>
+          <button id="btn-save-name" class="btn primary" type="submit">Save</button>
+        </div>
+        <p id="name-msg" class="name-msg" role="status" aria-live="polite"></p>
+      </form>
       <div id="slot-tabs" class="slot-tabs" role="tablist"></div>
       <div id="item-grid" class="item-grid"></div>
     </section>
@@ -129,6 +138,7 @@
   <script src="js/rounding.js"></script>
   <script src="js/achievements.js"></script>
   <script src="js/avatar.js"></script>
+  <script src="js/names.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

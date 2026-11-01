@@ -361,3 +361,17 @@ h1 { font-size: 2rem; }
 .tier-pro { background: #1c7ed6; }
 .tier-allstar { background: #7048e8; }
 .tier-legend { background: linear-gradient(90deg, #f08c00, #e03131); }
+
+/* Player name */
+.avatar-btn-label { max-width: 9.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.95rem; }
+.name-form { margin: 0 0 14px; }
+.name-label { display: block; font-weight: 800; margin-bottom: 6px; }
+.name-row { display: flex; gap: 8px; }
+.name-row input {
+  flex: 1; min-width: 0; font: inherit; font-size: 1.15rem; font-weight: 700;
+  padding: 8px 12px; border-radius: 14px; border: 3px solid var(--border);
+  background: var(--panel); color: var(--ink);
+}
+.name-row input:focus { outline: none; border-color: var(--primary); }
+.dice-btn { padding: 8px 12px; font-size: 1.4rem; }
+.name-msg { min-height: 1.3em; margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
