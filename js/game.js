@@ -5,6 +5,7 @@
   var R = window.Rounding;
   var A = window.Achievements;
   var AV = window.Avatar;
+  var N = window.Names;
   var STORAGE_KEY = "roundingHoops.v1";
 
   var state = {
@@ -30,9 +31,11 @@
         p.gold = data.gold || 0;
         p.goldEarned = data.goldEarned || p.gold;
         p.avatar = data.avatar;
+        p.name = data.name;
       }
     } catch (e) { /* storage blocked or empty */ }
     p.avatar = AV.normalise(p.avatar);
+    p.name = N.clean(p.name) || N.generate();
     return p;
   }
 
@@ -41,6 +44,7 @@
   }
 
   var progress = loadProgress();
+  saveProgress(progress); // keep a newly generated name from the very first visit
 
   // ---------- Helpers ----------
   function $(id) { return document.getElementById(id); }
@@ -292,7 +296,9 @@
         }).join("")
       : "";
 
-    $("result-title").textContent = passed ? "Great game! 🏆" : "Good effort! 💪";
+    $("result-title").textContent = passed
+      ? "Great game, " + progress.name + "! 🏆"
+      : "Good effort, " + progress.name + "! 💪";
     $("result-score").textContent = state.score + " / " + R.QUESTIONS_PER_ROUND + " baskets";
     var msg;
     if (unlockedNew) msg = "You unlocked level " + (lvl.id + 1) + "!";
@@ -343,6 +349,8 @@
 
   function renderAvatars() {
     var look = progress.avatar.look;
+    $("topbar-name").textContent = progress.name;
+    $("btn-avatar").setAttribute("aria-label", progress.name + ": open the locker room");
     $("topbar-avatar").innerHTML = AV.svg(look, { viewBox: "26 4 48 48" });
     $("court-player").innerHTML = AV.svg(look);
   }
@@ -442,9 +450,36 @@
 
   function openLocker() {
     locker.tryOn = null;
+    $("name-input").value = progress.name;
+    $("name-msg").textContent = "";
     renderLocker();
     show("screen-locker");
   }
+
+  // ---------- Player name ----------
+  function saveName(name, message) {
+    progress.name = name;
+    saveProgress(progress);
+    $("name-input").value = name;
+    $("name-msg").textContent = message;
+    renderAvatars();
+  }
+
+  $("name-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = N.clean($("name-input").value);
+    if (!name) {
+      $("name-msg").textContent = "Type a name with at least one letter or number.";
+      return;
+    }
+    saveName(name, "Saved! Nice to meet you, " + name + ".");
+  });
+
+  $("btn-random-name").addEventListener("click", function () {
+    var name;
+    do { name = N.generate(); } while (name === progress.name);
+    saveName(name, "How about " + name + "? Roll again or type your own.");
+  });
 
   // ---------- Wiring ----------
   $("type-form").addEventListener("submit", function (e) {
