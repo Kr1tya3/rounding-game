@@ -177,10 +177,13 @@
     progress.gold += amount;
     renderGold();
     var pop = $("gold-pop");
+    var counter = $("gold");
     pop.textContent = "+" + amount;
     pop.classList.remove("show");
+    counter.classList.remove("bump");
     void pop.offsetWidth;
     pop.classList.add("show");
+    counter.classList.add("bump");
   }
 
   // Show a pop-up for each new trophy and remember it for the results screen.
