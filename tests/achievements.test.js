@@ -57,3 +57,10 @@ test("medal bonus scales with medal and level", () => {
   assert.strictEqual(A.medalBonus(A.medalFor(10), easy), 50);
   assert.strictEqual(A.medalBonus(A.medalFor(10), hard), 400);
 });
+
+test("time trial and lightning trophies", () => {
+  const p = fresh();
+  assert.deepStrictEqual(ids(A.awardTrophies(p, { lightning: true })), ["lightning"]);
+  assert.deepStrictEqual(ids(A.awardTrophies(p, { trialScore: 9 })), []);
+  assert.deepStrictEqual(ids(A.awardTrophies(p, { trialScore: 20 })).sort(), ["beat-the-clock", "speed-demon"]);
+});
