@@ -40,6 +40,10 @@ jobs:
         run: |
           mkdir _site
           cp -r index.html style.css js _site/
+          # Stamp asset URLs with the commit so browsers don't mix a new
+          # index.html with cached old CSS/JS after a deploy.
+          sed -i -E "s#(href|src)=\"(style\.css|js/[a-z]+\.js)\"#\1=\"\2?v=${GITHUB_SHA::7}\"#g" _site/index.html
+          grep -E 'v=[0-9a-f]{7}' _site/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
