@@ -1,0 +1,8 @@
+{
+  "name": "rounding-game",
+  "private": true,
+  "description": "Sports-themed rounding practice game for children",
+  "scripts": {
+    "test": "node --test"
+  }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rounding Hoops</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+
+    <!-- Home: pick a level -->
+    <section id="screen-home" class="screen active">
+      <h1>Rounding Hoops <span aria-hidden="true">🏀</span></h1>
+      <p class="lead">Round the number to score a basket! Score 7 out of 10 to unlock the next level.</p>
+      <div id="level-list" class="level-list"></div>
+    </section>
+
+    <!-- Play -->
+    <section id="screen-play" class="screen">
+      <header class="scoreboard">
+        <button id="btn-quit" class="link-btn" type="button">← Levels</button>
+        <div><span class="label">Level</span> <strong id="sb-level"></strong></div>
+        <div><span class="label">Shot</span> <strong id="sb-shot"></strong></div>
+        <div><span class="label">Baskets</span> <strong id="sb-score">0</strong></div>
+      </header>
+
+      <div class="court" aria-hidden="true">
+        <svg viewBox="0 0 300 180" class="court-svg">
+          <rect x="0" y="150" width="300" height="30" fill="var(--floor)"/>
+          <rect x="236" y="20" width="6" height="130" fill="#666"/>
+          <rect x="222" y="18" width="40" height="30" rx="2" fill="#fff" stroke="#444" stroke-width="2"/>
+          <rect x="234" y="28" width="16" height="12" fill="none" stroke="var(--hoop)" stroke-width="2"/>
+          <ellipse cx="222" cy="52" rx="18" ry="4" fill="none" stroke="var(--hoop)" stroke-width="3"/>
+          <path d="M205 53 L211 72 L233 72 L239 53" fill="none" stroke="#ccc" stroke-width="1.5"/>
+          <path d="M211 72 L222 53 L233 72 M216 72 L206 54 M228 72 L238 54" fill="none" stroke="#ccc" stroke-width="1"/>
+        </svg>
+        <div id="ball" class="ball">🏀</div>
+      </div>
+
+      <p class="prompt">Round <strong id="q-number" class="big-number"></strong> to the nearest <strong id="q-unit"></strong></p>
+
+      <div id="choices" class="choices"></div>
+
+      <form id="type-form" class="type-form" autocomplete="off">
+        <input id="type-input" type="text" inputmode="numeric" pattern="[0-9,]*" aria-label="Your answer">
+        <button type="submit" class="btn primary">Shoot!</button>
+      </form>
+
+      <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+      <div id="hint" class="hint"></div>
+      <button id="btn-next" class="btn primary" type="button">Next shot →</button>
+    </section>
+
+    <!-- Results -->
+    <section id="screen-result" class="screen">
+      <h2 id="result-title"></h2>
+      <p id="result-score" class="result-score"></p>
+      <p id="result-msg"></p>
+      <div class="result-actions">
+        <button id="btn-again" class="btn" type="button">Play again</button>
+        <button id="btn-next-level" class="btn primary" type="button">Next level →</button>
+        <button id="btn-levels" class="btn" type="button">All levels</button>
+      </div>
+    </section>
+
+  </main>
+  <script src="js/rounding.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
