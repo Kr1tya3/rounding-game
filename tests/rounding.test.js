@@ -59,3 +59,35 @@ test("mixed levels use all three places", () => {
 test("harder levels pay more gold per basket", () => {
   for (let i = 1; i < R.LEVELS.length; i++) assert.ok(R.LEVELS[i].gold > R.LEVELS[i - 1].gold);
 });
+
+test("speed bonus: lightning +50%, quick +25%, slow still earns the basket", () => {
+  const lvl = R.LEVELS[0]; // 5 gold, 4s lightning
+  assert.strictEqual(R.speedTier(lvl, 2).id, "lightning");
+  assert.strictEqual(R.speedBonus(lvl, 2), 3);  // 50% of 5, rounded
+  assert.strictEqual(R.speedTier(lvl, 6).id, "quick");
+  assert.strictEqual(R.speedBonus(lvl, 6), 1);
+  assert.strictEqual(R.speedTier(lvl, 30), null);
+  assert.strictEqual(R.speedBonus(lvl, 30), 0);
+  const hard = R.LEVELS[7]; // 40 gold, 10s
+  assert.strictEqual(R.speedBonus(hard, 9), 20);
+  assert.strictEqual(R.speedBonus(hard, 19), 10);
+  // The bonus is always smaller than the basket itself: correctness matters most.
+  for (const l of R.LEVELS) assert.ok(R.speedBonus(l, 0) < l.gold);
+});
+
+test("typing levels and mixed levels allow more time", () => {
+  for (let i = 0; i < R.LEVELS.length; i += 2) assert.ok(R.LEVELS[i + 1].speed > R.LEVELS[i].speed);
+});
+
+test("time trial questions are multiple choice from reached place values", () => {
+  for (let i = 0; i < 300; i++) {
+    const q1 = R.makeTrialQuestion(1);
+    assert.strictEqual(q1.unit, 10);
+    assert.strictEqual(q1.choices.length, 3);
+    const q8 = R.makeTrialQuestion(8);
+    assert.ok(q8.choices.includes(q8.answer));
+  }
+  const units = new Set();
+  for (let i = 0; i < 300; i++) units.add(R.makeTrialQuestion(8).unit);
+  assert.deepStrictEqual([...units].sort((a, b) => a - b), [10, 100, 1000]);
+});

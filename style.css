@@ -375,3 +375,32 @@ h1 { font-size: 2rem; }
 .name-row input:focus { outline: none; border-color: var(--primary); }
 .dice-btn { padding: 8px 12px; font-size: 1.4rem; }
 .name-msg { min-height: 1.3em; margin: 6px 0 0; color: var(--muted); font-size: 0.95rem; }
+
+/* Bonus clock / time trial countdown */
+.clock { display: flex; align-items: center; gap: 10px; margin: 4px 0 8px; }
+.clock-bar { flex: 1; height: 10px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.clock-fill { display: block; height: 100%; width: 100%; border-radius: 999px; background: #94d82d; }
+.clock-label { font-size: 0.85rem; font-weight: 800; color: var(--muted); white-space: nowrap; min-width: 13.5em; text-align: right; }
+.clock.bonus[data-tier="lightning"] .clock-fill { background: #f2b705; }
+.clock.bonus[data-tier="lightning"] .clock-label { color: #b37400; }
+.clock.bonus[data-tier="quick"] .clock-fill { background: #ff922b; }
+.clock.bonus[data-tier="quick"] .clock-label { color: #d9480f; }
+.clock.trial .clock-bar { height: 14px; }
+.clock.trial .clock-fill { background: #1c7ed6; }
+.clock.trial .clock-label { color: var(--ink); font-size: 1rem; min-width: 6.5em; }
+.clock.trial.ending .clock-fill { background: #e8590c; }
+
+/* Time trial card */
+.trial-card {
+  font: inherit; color: #fff; cursor: pointer; width: 100%; margin-top: 16px;
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  padding: 12px 16px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #1c7ed6, #7048e8);
+  box-shadow: 0 4px 0 #3b2a9e;
+}
+.trial-icon { font-size: 2.2rem; }
+.trial-text { flex: 1; display: flex; flex-direction: column; }
+.trial-title { font-weight: 900; font-size: 1.25rem; }
+.trial-sub { font-size: 0.9rem; opacity: 0.9; }
+.trial-best { display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+.trial-best b { font-size: 1.6rem; letter-spacing: 0; }

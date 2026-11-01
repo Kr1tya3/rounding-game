@@ -4,16 +4,17 @@
 
   // Levels: each place value has a "pick" stage (multiple choice) then a "type" stage.
   // gold = coins earned per basket; harder levels pay more.
+  // speed = seconds for a "lightning" answer (double it for a "quick" one).
   var LEVELS = [
-    { id: 1, unit: 10, mode: "pick", name: "Tens", stage: "Pick the answer", gold: 5 },
-    { id: 2, unit: 10, mode: "type", name: "Tens", stage: "Type the answer", gold: 8 },
-    { id: 3, unit: 100, mode: "pick", name: "Hundreds", stage: "Pick the answer", gold: 10 },
-    { id: 4, unit: 100, mode: "type", name: "Hundreds", stage: "Type the answer", gold: 15 },
-    { id: 5, unit: 1000, mode: "pick", name: "Thousands", stage: "Pick the answer", gold: 20 },
-    { id: 6, unit: 1000, mode: "type", name: "Thousands", stage: "Type the answer", gold: 25 },
+    { id: 1, unit: 10, mode: "pick", name: "Tens", stage: "Pick the answer", gold: 5, speed: 4 },
+    { id: 2, unit: 10, mode: "type", name: "Tens", stage: "Type the answer", gold: 8, speed: 7 },
+    { id: 3, unit: 100, mode: "pick", name: "Hundreds", stage: "Pick the answer", gold: 10, speed: 4 },
+    { id: 4, unit: 100, mode: "type", name: "Hundreds", stage: "Type the answer", gold: 15, speed: 7 },
+    { id: 5, unit: 1000, mode: "pick", name: "Thousands", stage: "Pick the answer", gold: 20, speed: 4 },
+    { id: 6, unit: 1000, mode: "type", name: "Thousands", stage: "Type the answer", gold: 25, speed: 7 },
     // Mixed: a number in the thousands, rounded to the nearest ten, hundred or thousand.
-    { id: 7, unit: "mixed", mode: "pick", name: "Mixed", stage: "Pick the answer", gold: 30 },
-    { id: 8, unit: "mixed", mode: "type", name: "Mixed", stage: "Type the answer", gold: 40 }
+    { id: 7, unit: "mixed", mode: "pick", name: "Mixed", stage: "Pick the answer", gold: 30, speed: 6 },
+    { id: 8, unit: "mixed", mode: "type", name: "Mixed", stage: "Type the answer", gold: 40, speed: 10 }
   ];
 
   var MIXED_UNITS = [10, 100, 1000];
@@ -99,6 +100,38 @@
     return q;
   }
 
+  // ---------- Speed bonus ----------
+  // Correctness always comes first: a wrong answer earns nothing however fast,
+  // and a slow right answer still earns the full basket gold. Being quick only
+  // adds a little extra on top.
+  var SPEED_TIERS = [
+    { id: "lightning", factor: 1, pct: 50, icon: "⚡", name: "Lightning shot" },
+    { id: "quick", factor: 2, pct: 25, icon: "🔥", name: "Quick shot" }
+  ];
+
+  function speedTier(level, seconds) {
+    for (var i = 0; i < SPEED_TIERS.length; i++) {
+      if (seconds <= level.speed * SPEED_TIERS[i].factor) return SPEED_TIERS[i];
+    }
+    return null;
+  }
+
+  function speedBonus(level, seconds) {
+    var t = speedTier(level, seconds);
+    return t ? Math.round(level.gold * t.pct / 100) : 0;
+  }
+
+  // ---------- Time trial ----------
+  // Always unlocked. Multiple-choice questions from the place values the
+  // player has reached, as many as they can in 60 seconds.
+  var TRIAL = { seconds: 60, gold: 5, bestBonus: 50 };
+
+  function makeTrialQuestion(unlocked, rand) {
+    rand = rand || Math.random;
+    var pool = LEVELS.filter(function (l) { return l.mode === "pick" && l.id <= Math.max(1, unlocked); });
+    return makeQuestion(pool[Math.floor(rand() * pool.length)], rand);
+  }
+
   // Accept typed answers like "1,000" or " 300 ".
   function parseAnswer(text) {
     var cleaned = String(text).replace(/[\s,]/g, "");
@@ -114,6 +147,11 @@
     LEVELS: LEVELS,
     QUESTIONS_PER_ROUND: QUESTIONS_PER_ROUND,
     PASS_MARK: PASS_MARK,
+    SPEED_TIERS: SPEED_TIERS,
+    TRIAL: TRIAL,
+    speedTier: speedTier,
+    speedBonus: speedBonus,
+    makeTrialQuestion: makeTrialQuestion,
     roundTo: roundTo,
     makeQuestion: makeQuestion,
     parseAnswer: parseAnswer,

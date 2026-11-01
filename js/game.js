@@ -14,6 +14,11 @@
     score: 0,
     question: null,
     answered: false,
+    mode: "round",    // "round" (10 shots) or "trial" (60-second time trial)
+    qStart: 0,        // when the current question appeared (ms)
+    speedGold: 0,     // speed bonus earned this round
+    trialEnd: 0,      // when the time trial ends (ms)
+    trialTimer: null,
     streak: 0,        // baskets in a row, carried across rounds
     newTrophies: []   // trophies won during the current round
   };
@@ -32,6 +37,7 @@
         p.goldEarned = data.goldEarned || p.gold;
         p.avatar = data.avatar;
         p.name = data.name;
+        p.trialBest = data.trialBest || 0;
       }
     } catch (e) { /* storage blocked or empty */ }
     p.avatar = AV.normalise(p.avatar);
@@ -83,27 +89,36 @@
       btn.addEventListener("click", function () { startLevel(lvl); });
       list.appendChild(btn);
     });
+    $("trial-best").innerHTML = progress.trialBest
+      ? "Best<b>" + progress.trialBest + "</b>"
+      : "New!";
     var won = Object.keys(progress.trophies).length;
     $("trophy-count").textContent = "(" + won + "/" + A.TROPHIES.length + ")";
   }
 
   // ---------- Play ----------
   function startLevel(lvl) {
+    stopClock();
+    state.mode = "round";
     state.level = lvl;
     state.questionIndex = 0;
     state.score = 0;
+    state.speedGold = 0;
     state.newTrophies = [];
     $("sb-level").textContent = lvl.id + " · " + lvl.name;
+    $("sb-shot-label").textContent = "Shot";
     show("screen-play");
     nextQuestion();
   }
 
   function nextQuestion() {
     state.answered = false;
-    state.question = R.makeQuestion(state.level);
+    var trial = state.mode === "trial";
+    state.question = trial ? R.makeTrialQuestion(progress.unlocked) : R.makeQuestion(state.level);
     var q = state.question;
+    state.qStart = performance.now();
 
-    $("sb-shot").textContent = (state.questionIndex + 1) + "/" + R.QUESTIONS_PER_ROUND;
+    if (!trial) $("sb-shot").textContent = (state.questionIndex + 1) + "/" + R.QUESTIONS_PER_ROUND;
     $("sb-score").textContent = state.score;
     $("q-number").textContent = R.formatNumber(q.number);
     $("q-unit").textContent = unitWord(q.unit);
@@ -117,7 +132,7 @@
     var form = $("type-form");
     choices.innerHTML = "";
 
-    if (state.level.mode === "pick") {
+    if (trial || state.level.mode === "pick") {
       form.style.display = "none";
       choices.style.display = "";
       q.choices.forEach(function (c) {
@@ -136,12 +151,97 @@
       input.disabled = false;
       input.focus();
     }
+    startClock();
+  }
+
+  // ---------- Clocks ----------
+  // In a normal round the bar is a gentle "bonus time" gauge: it drains slowly
+  // and when it is empty nothing bad happens, you just don't get the extra.
+  // In the time trial it is the 60-second countdown.
+  function startClock() {
+    if (state.trialTimer) return;
+    $("clock").className = "clock " + (state.mode === "trial" ? "trial" : "bonus");
+    var loop = function () {
+      if (!state.trialTimer) return;
+      var now = performance.now();
+      if (state.mode === "trial") {
+        var left = Math.max(0, state.trialEnd - now);
+        $("clock-fill").style.width = (left / (R.TRIAL.seconds * 1000) * 100) + "%";
+        var secs = Math.ceil(left / 1000);
+        $("clock-label").textContent = "⏱ " + secs + "s left";
+        $("sb-shot").textContent = "0:" + (secs < 10 ? "0" : "") + secs;
+        $("clock").classList.toggle("ending", secs <= 10);
+        if (left <= 0) { stopClock(); finishTrial(); return; }
+      } else if (!state.answered) {
+        var t = (now - state.qStart) / 1000;
+        var lvl = state.level;
+        var full = lvl.speed * R.SPEED_TIERS[R.SPEED_TIERS.length - 1].factor;
+        $("clock-fill").style.width = Math.max(0, 1 - t / full) * 100 + "%";
+        var tier = R.speedTier(lvl, t);
+        $("clock").setAttribute("data-tier", tier ? tier.id : "none");
+        $("clock-label").textContent = tier
+          ? tier.icon + " " + tier.name + " bonus +" + tier.pct + "%"
+          : "No rush, take your time 🙂";
+      }
+      state.trialTimer = requestAnimationFrame(loop);
+    };
+    state.trialTimer = requestAnimationFrame(loop);
+  }
+
+  function stopClock() {
+    if (state.trialTimer) cancelAnimationFrame(state.trialTimer);
+    state.trialTimer = null;
+  }
+
+  // ---------- Time trial ----------
+  function startTrial() {
+    stopClock();
+    state.mode = "trial";
+    state.level = null;
+    state.score = 0;
+    state.newTrophies = [];
+    state.trialEnd = performance.now() + R.TRIAL.seconds * 1000;
+    $("sb-level").textContent = "Trial";
+    $("sb-shot-label").textContent = "Time";
+    $("sb-shot").textContent = "1:00";
+    show("screen-play");
+    nextQuestion();
+  }
+
+  function finishTrial() {
+    stopClock();
+    state.answered = true;
+    var prevBest = progress.trialBest || 0;
+    var isBest = state.score > prevBest;
+    var bestBonus = isBest ? R.TRIAL.bestBonus : 0;
+    if (isBest) progress.trialBest = state.score;
+    if (bestBonus) addGold(bestBonus);
+    state.newTrophies = state.newTrophies.concat(
+      A.awardTrophies(progress, { streak: state.streak, trialScore: state.score }));
+    saveProgress(progress);
+
+    $("result-title").textContent = "Time's up, " + progress.name + "! ⏱";
+    $("result-score").textContent = state.score + " right in " + R.TRIAL.seconds + " seconds";
+    $("result-medal").innerHTML = isBest
+      ? '<span class="medal-big">🎉</span>New personal best!'
+      : "Your best is <b>" + prevBest + "</b>. Can you beat it?";
+    var trialGold = state.score * R.TRIAL.gold;
+    $("result-gold").innerHTML =
+      '<div class="pay-row"><span>' + state.score + " right × " + R.TRIAL.gold + "</span><b>+" + R.formatNumber(trialGold) + "</b></div>" +
+      (bestBonus ? '<div class="pay-row"><span>🎉 Personal best bonus</span><b>+' + bestBonus + "</b></div>" : "") +
+      '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(trialGold + bestBonus) + "</b></div>";
+    $("result-msg").textContent = "Accuracy beats speed: a wrong answer costs you time, so think before you tap!";
+    renderNewTrophies();
+    $("btn-next-level").style.display = "none";
+    show("screen-result");
   }
 
   function answer(value, button) {
     if (state.answered) return;
     var q = state.question;
     var correct = value === q.answer;
+    var seconds = (performance.now() - state.qStart) / 1000;
+    var trial = state.mode === "trial";
     state.answered = true;
 
     // Lock the inputs
@@ -158,19 +258,31 @@
       state.score++;
       state.streak++;
       progress.totalBaskets++;
-      addGold(state.level.gold);
+      var tier = trial ? null : R.speedTier(state.level, seconds);
+      var extra = trial ? 0 : R.speedBonus(state.level, seconds);
+      state.speedGold += extra;
+      addGold((trial ? R.TRIAL.gold : state.level.gold) + extra);
       $("sb-score").textContent = state.score;
-      fb.textContent = pick(["Swish! 🎉", "Nothing but net!", "Slam dunk!", "Great shot!"]);
+      fb.textContent = pick(["Swish! 🎉", "Nothing but net!", "Slam dunk!", "Great shot!"]) +
+        (tier ? " " + tier.icon + " " + tier.name + "! +" + extra : "");
       fb.className = "feedback good";
       shootBall(true);
-      celebrate(A.awardTrophies(progress, { streak: state.streak }));
+      celebrate(A.awardTrophies(progress, { streak: state.streak, lightning: tier && tier.id === "lightning" }));
       saveProgress(progress);
     } else {
       state.streak = 0;
       fb.textContent = "Missed! The answer is " + R.formatNumber(q.answer) + ".";
       fb.className = "feedback bad";
       shootBall(false);
-      $("hint").innerHTML = numberLineHint(q);
+      if (!trial) $("hint").innerHTML = numberLineHint(q);
+    }
+
+    if (trial) {
+      // Keep the trial flowing: short pause, a little longer after a miss.
+      setTimeout(function () {
+        if (state.mode === "trial" && state.trialTimer) nextQuestion();
+      }, correct ? 450 : 1100);
+      return;
     }
 
     var last = state.questionIndex + 1 >= R.QUESTIONS_PER_ROUND;
@@ -260,7 +372,16 @@
   }
 
   // ---------- Results ----------
+  function renderNewTrophies() {
+    $("result-new").innerHTML = state.newTrophies.length
+      ? "<h3>New trophies!</h3>" + state.newTrophies.map(function (t) {
+          return '<div class="new-trophy"><span>' + t.icon + "</span> " + t.name + "</div>";
+        }).join("")
+      : "";
+  }
+
   function finishRound() {
+    stopClock();
     var lvl = state.level;
     var passed = state.score >= R.PASS_MARK;
     var prevBest = progress.best[lvl.id];
@@ -288,13 +409,10 @@
     var basketGold = state.score * lvl.gold;
     $("result-gold").innerHTML =
       '<div class="pay-row"><span>' + state.score + " baskets × " + lvl.gold + "</span><b>+" + R.formatNumber(basketGold) + "</b></div>" +
+      (state.speedGold ? '<div class="pay-row"><span>⚡ Speed bonuses</span><b>+' + R.formatNumber(state.speedGold) + "</b></div>" : "") +
       (bonus ? '<div class="pay-row"><span>' + medal.icon + " " + medal.name + " medal bonus</span><b>+" + R.formatNumber(bonus) + "</b></div>" : "") +
-      '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(basketGold + bonus) + "</b></div>";
-    $("result-new").innerHTML = state.newTrophies.length
-      ? "<h3>New trophies!</h3>" + state.newTrophies.map(function (t) {
-          return '<div class="new-trophy"><span>' + t.icon + "</span> " + t.name + "</div>";
-        }).join("")
-      : "";
+      '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(basketGold + state.speedGold + bonus) + "</b></div>";
+    renderNewTrophies();
 
     $("result-title").textContent = passed
       ? "Great game, " + progress.name + "! 🏆"
@@ -500,7 +618,8 @@
     else nextQuestion();
   });
 
-  $("btn-quit").addEventListener("click", function () { renderLevels(); show("screen-home"); });
+  $("btn-quit").addEventListener("click", function () { stopClock(); renderLevels(); show("screen-home"); });
+  $("btn-trial").addEventListener("click", startTrial);
   $("btn-levels").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-trophies").addEventListener("click", openTrophyRoom);
   $("btn-locker").addEventListener("click", openLocker);
@@ -508,7 +627,9 @@
   $("btn-locker-back").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-result-trophies").addEventListener("click", openTrophyRoom);
   $("btn-trophies-back").addEventListener("click", function () { renderLevels(); show("screen-home"); });
-  $("btn-again").addEventListener("click", function () { startLevel(state.level); });
+  $("btn-again").addEventListener("click", function () {
+    if (state.mode === "trial") startTrial(); else startLevel(state.level);
+  });
   $("btn-next-level").addEventListener("click", function () { startLevel(R.LEVELS[state.level.id]); });
 
   renderLevels();

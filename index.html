@@ -41,6 +41,14 @@
     <section id="screen-home" class="screen active">
       <h1>Rounding Hoops <span aria-hidden="true">🏀</span></h1>
       <p class="lead">Round the number to score a basket! Score 7 out of 10 to unlock the next level.</p>
+      <button id="btn-trial" class="trial-card" type="button">
+        <span class="trial-icon" aria-hidden="true">⏱️</span>
+        <span class="trial-text">
+          <span class="trial-title">Time Trial</span>
+          <span class="trial-sub">How many can you get right in 60 seconds?</span>
+        </span>
+        <span id="trial-best" class="trial-best"></span>
+      </button>
       <div id="level-list" class="level-list"></div>
       <div class="home-buttons">
         <button id="btn-locker" class="btn locker-btn" type="button">👕 Locker Room</button>
@@ -53,7 +61,7 @@
       <header class="scoreboard">
         <button id="btn-quit" class="link-btn" type="button">← Levels</button>
         <div><span class="label">Level</span> <strong id="sb-level"></strong></div>
-        <div><span class="label">Shot</span> <strong id="sb-shot"></strong></div>
+        <div><span id="sb-shot-label" class="label">Shot</span> <strong id="sb-shot"></strong></div>
         <div><span class="label">Baskets</span> <strong id="sb-score">0</strong></div>
       </header>
 
@@ -69,6 +77,11 @@
         </svg>
         <div id="court-player" class="court-player"></div>
         <div id="ball" class="ball">🏀</div>
+      </div>
+
+      <div id="clock" class="clock" aria-hidden="true">
+        <div class="clock-bar"><span id="clock-fill" class="clock-fill"></span></div>
+        <span id="clock-label" class="clock-label"></span>
       </div>
 
       <p class="prompt">Round <strong id="q-number" class="big-number"></strong> to the nearest <strong id="q-unit"></strong></p>
