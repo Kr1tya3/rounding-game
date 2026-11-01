@@ -19,7 +19,7 @@
 
   // ---------- Saved progress (this device only) ----------
   function loadProgress() {
-    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {}, gold: 0 };
+    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {}, gold: 0, goldEarned: 0 };
     try {
       var data = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (data && typeof data.unlocked === "number") {
@@ -28,6 +28,7 @@
         p.totalBaskets = data.totalBaskets || 0;
         p.trophies = data.trophies || {};
         p.gold = data.gold || 0;
+        p.goldEarned = data.goldEarned || p.gold;
         p.avatar = data.avatar;
       }
     } catch (e) { /* storage blocked or empty */ }
@@ -72,6 +73,7 @@
         '<span class="level-num">' + lvl.id + "</span>" +
         '<span class="level-name">' + lvl.name + "</span>" +
         '<span class="level-stage">' + (locked ? "🔒 Locked" : lvl.stage) + "</span>" +
+        '<span class="level-pay"><span class="mini-coin" aria-hidden="true"></span>' + lvl.gold + " per basket</span>" +
         (best != null ? '<span class="level-best">Best: ' + best + "/" + R.QUESTIONS_PER_ROUND + "</span>" : "") +
         (medal ? '<span class="level-medal" title="' + medal.name + ' medal">' + medal.icon + "</span>" : "");
       btn.addEventListener("click", function () { startLevel(lvl); });
@@ -152,7 +154,7 @@
       state.score++;
       state.streak++;
       progress.totalBaskets++;
-      addGold(R.GOLD_PER_BASKET);
+      addGold(state.level.gold);
       $("sb-score").textContent = state.score;
       fb.textContent = pick(["Swish! 🎉", "Nothing but net!", "Slam dunk!", "Great shot!"]);
       fb.className = "feedback good";
@@ -178,6 +180,7 @@
 
   function addGold(amount) {
     progress.gold += amount;
+    progress.goldEarned += amount;
     renderGold();
     var pop = $("gold-pop");
     var counter = $("gold");
@@ -264,11 +267,13 @@
       progress.unlocked = lvl.id + 1;
       unlockedNew = true;
     }
+    var medal = A.medalFor(state.score);
+    var bonus = A.medalBonus(medal, lvl);
+    if (bonus) addGold(bonus);
     var roundTrophies = A.awardTrophies(progress, { streak: state.streak, roundScore: state.score });
     state.newTrophies = state.newTrophies.concat(roundTrophies);
     saveProgress(progress);
 
-    var medal = A.medalFor(state.score);
     var medalText = "";
     if (medal) {
       var isNew = !prevMedal || medal.min > prevMedal.min;
@@ -276,6 +281,11 @@
         (isNew ? "You won a <b>" + medal.name + "</b> medal!" : medal.name + " medal");
     }
     $("result-medal").innerHTML = medalText;
+    var basketGold = state.score * lvl.gold;
+    $("result-gold").innerHTML =
+      '<div class="pay-row"><span>' + state.score + " baskets × " + lvl.gold + "</span><b>+" + R.formatNumber(basketGold) + "</b></div>" +
+      (bonus ? '<div class="pay-row"><span>' + medal.icon + " " + medal.name + " medal bonus</span><b>+" + R.formatNumber(bonus) + "</b></div>" : "") +
+      '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(basketGold + bonus) + "</b></div>";
     $("result-new").innerHTML = state.newTrophies.length
       ? "<h3>New trophies!</h3>" + state.newTrophies.map(function (t) {
           return '<div class="new-trophy"><span>' + t.icon + "</span> " + t.name + "</div>";
@@ -379,7 +389,8 @@
     pick.className = "item-pick";
     pick.innerHTML =
       '<span class="item-preview">' + (it ? AV.itemPreview(it) : '<span class="none-mark">✕</span>') + "</span>" +
-      '<span class="item-name">' + (it ? it.name : "None") + "</span>";
+      '<span class="item-name">' + (it ? it.name : "None") + "</span>" +
+      (it && it.price > 0 ? '<span class="tier tier-' + AV.tierFor(it).id + '">' + AV.tierFor(it).name + "</span>" : "");
     pick.addEventListener("click", function () {
       if (owned) {
         AV.equip(progress.avatar, slot.id, it ? it.id : null);

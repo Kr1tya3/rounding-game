@@ -5,11 +5,17 @@
   var LEVEL_COUNT = 8;
 
   // Medal for a level from the best score out of 10.
+  // bonus = how many baskets' worth of that level's gold the medal pays on top.
   var MEDALS = [
-    { id: "gold", min: 10, name: "Gold", icon: "🥇" },
-    { id: "silver", min: 9, name: "Silver", icon: "🥈" },
-    { id: "bronze", min: 7, name: "Bronze", icon: "🥉" }
+    { id: "gold", min: 10, name: "Gold", icon: "🥇", bonus: 10 },
+    { id: "silver", min: 9, name: "Silver", icon: "🥈", bonus: 5 },
+    { id: "bronze", min: 7, name: "Bronze", icon: "🥉", bonus: 2 }
   ];
+
+  // Extra gold for winning a medal in a round of the given level.
+  function medalBonus(medal, level) {
+    return medal ? medal.bonus * level.gold : 0;
+  }
 
   function medalFor(score) {
     if (score == null) return null;
@@ -39,8 +45,10 @@
       test: function (p) { return passed(p, 5) && passed(p, 6); } },
     { id: "mixed-champ", icon: "🌟", name: "Mixed Master", desc: "Pass both mixed levels.",
       test: function (p) { return passed(p, 7) && passed(p, 8); } },
-    { id: "treasure-chest", icon: "💰", name: "Treasure Chest", desc: "Collect 500 gold.",
-      test: function (p) { return (p.gold || 0) >= 500; } },
+    { id: "treasure-chest", icon: "💰", name: "Treasure Chest", desc: "Earn 1,000 gold in total.",
+      test: function (p) { return (p.goldEarned || 0) >= 1000; } },
+    { id: "gold-rush", icon: "🏦", name: "Gold Rush", desc: "Earn 10,000 gold in total.",
+      test: function (p) { return (p.goldEarned || 0) >= 10000; } },
     { id: "century", icon: "💯", name: "Century", desc: "Score 100 baskets in total.",
       test: function (p) { return p.totalBaskets >= 100; } },
     { id: "hall-of-fame", icon: "👑", name: "Hall of Fame", desc: "Win a gold medal on every level.",
@@ -64,7 +72,7 @@
     return earned;
   }
 
-  var api = { MEDALS: MEDALS, TROPHIES: TROPHIES, medalFor: medalFor, awardTrophies: awardTrophies };
+  var api = { medalBonus: medalBonus, MEDALS: MEDALS, TROPHIES: TROPHIES, medalFor: medalFor, awardTrophies: awardTrophies };
 
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Achievements = api;

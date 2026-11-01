@@ -55,3 +55,7 @@ test("mixed levels use all three places", () => {
   for (let i = 0; i < 300; i++) seen.add(R.makeQuestion(R.LEVELS[6]).unit);
   assert.deepStrictEqual([...seen].sort((a, b) => a - b), [10, 100, 1000]);
 });
+
+test("harder levels pay more gold per basket", () => {
+  for (let i = 1; i < R.LEVELS.length; i++) assert.ok(R.LEVELS[i].gold > R.LEVELS[i - 1].gold);
+});
