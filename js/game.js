@@ -18,7 +18,7 @@
 
   // ---------- Saved progress (this device only) ----------
   function loadProgress() {
-    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {} };
+    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {}, gold: 0 };
     try {
       var data = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (data && typeof data.unlocked === "number") {
@@ -26,6 +26,7 @@
         p.best = data.best || {};
         p.totalBaskets = data.totalBaskets || 0;
         p.trophies = data.trophies || {};
+        p.gold = data.gold || 0;
       }
     } catch (e) { /* storage blocked or empty */ }
     return p;
@@ -148,6 +149,7 @@
       state.score++;
       state.streak++;
       progress.totalBaskets++;
+      addGold(R.GOLD_PER_BASKET);
       $("sb-score").textContent = state.score;
       fb.textContent = pick(["Swish! 🎉", "Nothing but net!", "Slam dunk!", "Great shot!"]);
       fb.className = "feedback good";
@@ -166,6 +168,19 @@
     $("btn-next").textContent = last ? "See results →" : "Next shot →";
     $("btn-next").style.display = "";
     $("btn-next").focus();
+  }
+
+  // ---------- Gold ----------
+  function renderGold() { $("gold-count").textContent = R.formatNumber(progress.gold); }
+
+  function addGold(amount) {
+    progress.gold += amount;
+    renderGold();
+    var pop = $("gold-pop");
+    pop.textContent = "+" + amount;
+    pop.classList.remove("show");
+    void pop.offsetWidth;
+    pop.classList.add("show");
   }
 
   // Show a pop-up for each new trophy and remember it for the results screen.
@@ -331,4 +346,5 @@
   $("btn-next-level").addEventListener("click", function () { startLevel(R.LEVELS[state.level.id]); });
 
   renderLevels();
+  renderGold();
 })();

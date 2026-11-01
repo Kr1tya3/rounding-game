@@ -217,10 +217,33 @@ h1 { font-size: 2rem; }
 
 /* Trophy pop-up */
 .toast {
-  position: fixed; left: 50%; top: 16px; transform: translate(-50%, -150%);
+  position: fixed; left: 50%; top: 16px; transform: translate(-50%, calc(-100% - 24px));
   background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 14px;
   font-size: 1.05rem; max-width: calc(100% - 32px); box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-  transition: transform 0.35s ease; z-index: 10; text-align: center;
+  transition: transform 0.35s ease, visibility 0.35s; z-index: 10; text-align: center;
+  visibility: hidden;
 }
-.toast.show { transform: translate(-50%, 0); }
+.toast.show { transform: translate(-50%, 0); visibility: visible; }
 .toast-icon { font-size: 1.5rem; vertical-align: middle; }
+
+/* Gold counter (top right) */
+.topbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.gold-counter {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--panel); border: 2px solid #f2c94c; border-radius: 999px;
+  padding: 4px 14px 4px 6px; font-weight: 800; font-size: 1.15rem;
+}
+.coin {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff3b0 0 18%, #f7c948 19% 60%, #d4a017 61%);
+  border: 2px solid #b8860b; box-sizing: border-box;
+}
+.gold-pop {
+  position: absolute; right: 10px; top: 0; color: #d4a017; font-weight: 900; opacity: 0; pointer-events: none;
+}
+.gold-pop.show { animation: gold-pop 0.9s ease-out; }
+@keyframes gold-pop {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-28px); }
+}

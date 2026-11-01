@@ -8,10 +8,11 @@ Play online at https://kr1tya3.github.io/rounding-game/, or open `index.html` in
 
 ## How it works
 
-- Six levels: tens, hundreds and thousands. Each has a multiple-choice stage, then a stage where you type the answer.
+- Eight levels: tens, hundreds, thousands, then mixed (a number in the thousands rounded to the nearest ten, hundred or thousand). Each has a multiple-choice stage, then a stage where you type the answer.
+- Every basket earns 10 gold, shown in the coin counter at the top right.
 - Each round is 10 shots. Score 7 or more to unlock the next level.
 - A wrong answer shows a number line explaining which multiple is closer. Halfway numbers round up.
-- Medals for each level (bronze 7+, silver 9+, gold 10) and nine trophies, all shown in the Trophy Room.
+- Medals for each level (bronze 7+, silver 9+, gold 10) and eleven trophies, all shown in the Trophy Room.
 - Progress is saved in the browser on that device (no accounts).
 
 ## Tests
