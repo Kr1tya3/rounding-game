@@ -3,20 +3,20 @@
   "use strict";
 
   // Levels: each place value has a "pick" stage (multiple choice) then a "type" stage.
+  // gold = coins earned per basket; harder levels pay more.
   var LEVELS = [
-    { id: 1, unit: 10, mode: "pick", name: "Tens", stage: "Pick the answer" },
-    { id: 2, unit: 10, mode: "type", name: "Tens", stage: "Type the answer" },
-    { id: 3, unit: 100, mode: "pick", name: "Hundreds", stage: "Pick the answer" },
-    { id: 4, unit: 100, mode: "type", name: "Hundreds", stage: "Type the answer" },
-    { id: 5, unit: 1000, mode: "pick", name: "Thousands", stage: "Pick the answer" },
-    { id: 6, unit: 1000, mode: "type", name: "Thousands", stage: "Type the answer" },
+    { id: 1, unit: 10, mode: "pick", name: "Tens", stage: "Pick the answer", gold: 5 },
+    { id: 2, unit: 10, mode: "type", name: "Tens", stage: "Type the answer", gold: 8 },
+    { id: 3, unit: 100, mode: "pick", name: "Hundreds", stage: "Pick the answer", gold: 10 },
+    { id: 4, unit: 100, mode: "type", name: "Hundreds", stage: "Type the answer", gold: 15 },
+    { id: 5, unit: 1000, mode: "pick", name: "Thousands", stage: "Pick the answer", gold: 20 },
+    { id: 6, unit: 1000, mode: "type", name: "Thousands", stage: "Type the answer", gold: 25 },
     // Mixed: a number in the thousands, rounded to the nearest ten, hundred or thousand.
-    { id: 7, unit: "mixed", mode: "pick", name: "Mixed", stage: "Pick the answer" },
-    { id: 8, unit: "mixed", mode: "type", name: "Mixed", stage: "Type the answer" }
+    { id: 7, unit: "mixed", mode: "pick", name: "Mixed", stage: "Pick the answer", gold: 30 },
+    { id: 8, unit: "mixed", mode: "type", name: "Mixed", stage: "Type the answer", gold: 40 }
   ];
 
   var MIXED_UNITS = [10, 100, 1000];
-  var GOLD_PER_BASKET = 10;
 
   var QUESTIONS_PER_ROUND = 10;
   var PASS_MARK = 7;
@@ -114,7 +114,6 @@
     LEVELS: LEVELS,
     QUESTIONS_PER_ROUND: QUESTIONS_PER_ROUND,
     PASS_MARK: PASS_MARK,
-    GOLD_PER_BASKET: GOLD_PER_BASKET,
     roundTo: roundTo,
     makeQuestion: makeQuestion,
     parseAnswer: parseAnswer,

@@ -341,3 +341,23 @@ h1 { font-size: 2rem; }
   border: 1.5px solid #b37400;
 }
 .need { font-size: 0.72rem; color: var(--muted); }
+
+/* Economy */
+.level-pay { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: 800; color: #b37400; }
+.level-card.locked .level-pay { color: var(--muted); }
+.result-gold {
+  max-width: 320px; margin: 10px auto; padding: 10px 14px; border-radius: 14px;
+  background: linear-gradient(180deg, #2a3557 0%, #1a2240 100%); color: #f7e3a1; border: 3px solid #f2b705;
+}
+.pay-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+.pay-row b { color: #ffd23f; }
+.pay-row.total { border-top: 1px solid rgba(255,255,255,0.2); margin-top: 4px; padding-top: 6px; font-weight: 800; font-size: 1.1rem; }
+.pay-row.total span { display: inline-flex; align-items: center; gap: 6px; }
+.tier {
+  font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 1px 8px; border-radius: 999px; color: #fff;
+}
+.tier-rookie { background: #2b8a3e; }
+.tier-pro { background: #1c7ed6; }
+.tier-allstar { background: #7048e8; }
+.tier-legend { background: linear-gradient(90deg, #f08c00, #e03131); }

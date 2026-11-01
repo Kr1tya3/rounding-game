@@ -12,6 +12,21 @@
     { id: "extra", name: "Extras", icon: "✨", optional: true }
   ];
 
+  // Price tiers, from easy to hard to get. A perfect round pays roughly
+  // 100 gold on level 1 and 800 on level 8 (baskets + gold medal bonus).
+  var TIERS = [
+    { id: "starter", name: "Starter", max: 0 },
+    { id: "rookie", name: "Rookie", max: 250 },
+    { id: "pro", name: "Pro", max: 900 },
+    { id: "allstar", name: "All-Star", max: 3000 },
+    { id: "legend", name: "Legend", max: Infinity }
+  ];
+
+  function tierFor(it) {
+    for (var i = 0; i < TIERS.length; i++) if (it.price <= TIERS[i].max) return TIERS[i];
+    return TIERS[TIERS.length - 1];
+  }
+
   // price 0 = free and owned from the start.
   var ITEMS = [
     { id: "skin-1", slot: "skin", name: "Tone 1", price: 0, color: "#f6d3b3" },
@@ -20,31 +35,31 @@
     { id: "skin-4", slot: "skin", name: "Tone 4", price: 0, color: "#7a4a2a" },
 
     { id: "jersey-orange", slot: "jersey", name: "Orange", price: 0, color: "#e8590c", trim: "#fff" },
-    { id: "jersey-blue", slot: "jersey", name: "Blue", price: 40, color: "#1c7ed6", trim: "#fff" },
-    { id: "jersey-green", slot: "jersey", name: "Green", price: 40, color: "#2b8a3e", trim: "#fff" },
-    { id: "jersey-purple", slot: "jersey", name: "Purple", price: 60, color: "#7048e8", trim: "#ffd43b" },
-    { id: "jersey-black", slot: "jersey", name: "Night", price: 100, color: "#212529", trim: "#ff6b6b" },
-    { id: "jersey-gold", slot: "jersey", name: "Gold", price: 250, color: "#f2b705", trim: "#7a4a00" },
+    { id: "jersey-blue", slot: "jersey", name: "Blue", price: 150, color: "#1c7ed6", trim: "#fff" },
+    { id: "jersey-green", slot: "jersey", name: "Green", price: 150, color: "#2b8a3e", trim: "#fff" },
+    { id: "jersey-purple", slot: "jersey", name: "Purple", price: 500, color: "#7048e8", trim: "#ffd43b" },
+    { id: "jersey-black", slot: "jersey", name: "Night", price: 900, color: "#212529", trim: "#ff6b6b" },
+    { id: "jersey-gold", slot: "jersey", name: "Gold", price: 3000, color: "#f2b705", trim: "#7a4a00" },
 
-    { id: "hat-headband", slot: "hat", name: "Headband", price: 30 },
-    { id: "hat-cap", slot: "hat", name: "Cap", price: 50 },
-    { id: "hat-backwards", slot: "hat", name: "Snapback", price: 70 },
-    { id: "hat-beanie", slot: "hat", name: "Beanie", price: 90 },
-    { id: "hat-crown", slot: "hat", name: "Crown", price: 400 },
+    { id: "hat-headband", slot: "hat", name: "Headband", price: 100 },
+    { id: "hat-cap", slot: "hat", name: "Cap", price: 250 },
+    { id: "hat-backwards", slot: "hat", name: "Snapback", price: 400 },
+    { id: "hat-beanie", slot: "hat", name: "Beanie", price: 700 },
+    { id: "hat-crown", slot: "hat", name: "Crown", price: 10000 },
 
-    { id: "glasses-sport", slot: "glasses", name: "Sport goggles", price: 60 },
-    { id: "glasses-sun", slot: "glasses", name: "Sunglasses", price: 80 },
-    { id: "glasses-star", slot: "glasses", name: "Star glasses", price: 150 },
+    { id: "glasses-sport", slot: "glasses", name: "Sport goggles", price: 450 },
+    { id: "glasses-sun", slot: "glasses", name: "Sunglasses", price: 600 },
+    { id: "glasses-star", slot: "glasses", name: "Star glasses", price: 1500 },
 
     { id: "shoes-white", slot: "shoes", name: "White", price: 0, color: "#f1f3f5" },
-    { id: "shoes-red", slot: "shoes", name: "Red", price: 50, color: "#e03131" },
-    { id: "shoes-neon", slot: "shoes", name: "Neon", price: 80, color: "#94d82d" },
-    { id: "shoes-gold", slot: "shoes", name: "Gold", price: 300, color: "#f2b705" },
+    { id: "shoes-red", slot: "shoes", name: "Red", price: 200, color: "#e03131" },
+    { id: "shoes-neon", slot: "shoes", name: "Neon", price: 800, color: "#94d82d" },
+    { id: "shoes-gold", slot: "shoes", name: "Gold", price: 5000, color: "#f2b705" },
 
-    { id: "extra-wristbands", slot: "extra", name: "Wristbands", price: 30 },
-    { id: "extra-whistle", slot: "extra", name: "Whistle", price: 60 },
-    { id: "extra-chain", slot: "extra", name: "Gold chain", price: 200 },
-    { id: "extra-cape", slot: "extra", name: "Hero cape", price: 350 }
+    { id: "extra-wristbands", slot: "extra", name: "Wristbands", price: 120 },
+    { id: "extra-whistle", slot: "extra", name: "Whistle", price: 500 },
+    { id: "extra-chain", slot: "extra", name: "Gold chain", price: 2500 },
+    { id: "extra-cape", slot: "extra", name: "Hero cape", price: 7500 }
   ];
 
   var DEFAULT_LOOK = { skin: "skin-2", jersey: "jersey-orange", hat: null, glasses: null, shoes: "shoes-white", extra: null };
@@ -54,7 +69,11 @@
     return null;
   }
 
-  function itemsFor(slot) { return ITEMS.filter(function (it) { return it.slot === slot; }); }
+  // Items of one slot, cheapest first.
+  function itemsFor(slot) {
+    return ITEMS.filter(function (it) { return it.slot === slot; })
+      .sort(function (a, b) { return a.price - b.price; });
+  }
 
   // Make sure saved avatar data is complete and valid.
   function normalise(avatar) {
@@ -207,7 +226,7 @@
   }
 
   var api = {
-    SLOTS: SLOTS, ITEMS: ITEMS, DEFAULT_LOOK: DEFAULT_LOOK,
+    SLOTS: SLOTS, ITEMS: ITEMS, TIERS: TIERS, tierFor: tierFor, DEFAULT_LOOK: DEFAULT_LOOK,
     item: item, itemsFor: itemsFor, normalise: normalise, owns: owns,
     buy: buy, equip: equip, svg: svg, itemPreview: itemPreview
   };

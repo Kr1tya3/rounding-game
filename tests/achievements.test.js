@@ -38,10 +38,22 @@ test("hall of fame needs gold everywhere", () => {
   assert.deepStrictEqual(ids(A.awardTrophies(p, {})), ["hall-of-fame"]);
 });
 
-test("treasure chest at 500 gold", () => {
+test("gold trophies count gold earned, not gold left after shopping", () => {
   const p = fresh();
-  p.gold = 490;
+  p.gold = 0;
+  p.goldEarned = 990;
   assert.ok(!ids(A.awardTrophies(p, {})).includes("treasure-chest"));
-  p.gold = 500;
+  p.goldEarned = 1000;
   assert.deepStrictEqual(ids(A.awardTrophies(p, {})), ["treasure-chest"]);
+  p.goldEarned = 10000;
+  assert.deepStrictEqual(ids(A.awardTrophies(p, {})), ["gold-rush"]);
+});
+
+test("medal bonus scales with medal and level", () => {
+  const easy = { gold: 5 }, hard = { gold: 40 };
+  assert.strictEqual(A.medalBonus(null, hard), 0);
+  assert.strictEqual(A.medalBonus(A.medalFor(7), easy), 10);
+  assert.strictEqual(A.medalBonus(A.medalFor(9), easy), 25);
+  assert.strictEqual(A.medalBonus(A.medalFor(10), easy), 50);
+  assert.strictEqual(A.medalBonus(A.medalFor(10), hard), 400);
 });
