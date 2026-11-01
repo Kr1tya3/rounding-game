@@ -185,3 +185,42 @@ h1 { font-size: 2rem; }
 @media (prefers-reduced-motion: reduce) {
   .ball.shot-in, .ball.shot-miss { animation-duration: 0.01s; }
 }
+
+/* Medals on level cards */
+.level-card { position: relative; }
+.level-medal { position: absolute; top: 6px; right: 8px; font-size: 1.6rem; }
+
+.trophy-btn { display: block; width: 100%; margin-top: 16px; background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* Results */
+.result-medal { text-align: center; font-size: 1.2rem; }
+.medal-big { display: block; font-size: 3.5rem; line-height: 1.1; }
+.result-new { text-align: center; }
+.result-new h3 { margin: 12px 0 6px; }
+.new-trophy { font-weight: 700; font-size: 1.1rem; margin: 4px 0; }
+.new-trophy span { font-size: 1.6rem; vertical-align: middle; }
+
+/* Trophy room */
+.shelf-title { margin: 20px 0 8px; border-bottom: 4px solid var(--floor); padding-bottom: 4px; }
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.medal-shelf { grid-template-columns: repeat(3, 1fr); }
+.shelf-item {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px;
+  padding: 12px 6px; border-radius: 14px; background: var(--panel); border: 2px solid var(--border);
+}
+.shelf-item.won { border-color: var(--ball); box-shadow: 0 0 0 3px rgba(240, 140, 0, 0.18); }
+.shelf-item.empty { opacity: 0.55; }
+.shelf-item.empty .shelf-icon { filter: grayscale(1); }
+.shelf-icon { font-size: 2.6rem; line-height: 1.1; }
+.shelf-name { font-weight: 800; }
+.shelf-desc { font-size: 0.85rem; color: var(--muted); }
+
+/* Trophy pop-up */
+.toast {
+  position: fixed; left: 50%; top: 16px; transform: translate(-50%, -150%);
+  background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 14px;
+  font-size: 1.05rem; max-width: calc(100% - 32px); box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  transition: transform 0.35s ease; z-index: 10; text-align: center;
+}
+.toast.show { transform: translate(-50%, 0); }
+.toast-icon { font-size: 1.5rem; vertical-align: middle; }

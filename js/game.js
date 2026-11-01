@@ -3,6 +3,7 @@
   "use strict";
 
   var R = window.Rounding;
+  var A = window.Achievements;
   var STORAGE_KEY = "roundingHoops.v1";
 
   var state = {
@@ -10,16 +11,24 @@
     questionIndex: 0,
     score: 0,
     question: null,
-    answered: false
+    answered: false,
+    streak: 0,        // baskets in a row, carried across rounds
+    newTrophies: []   // trophies won during the current round
   };
 
   // ---------- Saved progress (this device only) ----------
   function loadProgress() {
+    var p = { unlocked: 1, best: {}, totalBaskets: 0, trophies: {} };
     try {
       var data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (data && typeof data.unlocked === "number") return data;
+      if (data && typeof data.unlocked === "number") {
+        p.unlocked = data.unlocked;
+        p.best = data.best || {};
+        p.totalBaskets = data.totalBaskets || 0;
+        p.trophies = data.trophies || {};
+      }
     } catch (e) { /* storage blocked or empty */ }
-    return { unlocked: 1, best: {} };
+    return p;
   }
 
   function saveProgress(p) {
@@ -35,6 +44,7 @@
     var screens = document.querySelectorAll(".screen");
     for (var i = 0; i < screens.length; i++) screens[i].classList.remove("active");
     $(screenId).classList.add("active");
+    if (screenId !== "screen-play") $("toast").classList.remove("show");
     window.scrollTo(0, 0);
   }
 
@@ -53,14 +63,18 @@
       btn.className = "level-card" + (locked ? " locked" : "");
       btn.disabled = locked;
       var best = progress.best[lvl.id];
+      var medal = A.medalFor(best);
       btn.innerHTML =
         '<span class="level-num">' + lvl.id + "</span>" +
         '<span class="level-name">' + lvl.name + "</span>" +
         '<span class="level-stage">' + (locked ? "🔒 Locked" : lvl.stage) + "</span>" +
-        (best != null ? '<span class="level-best">Best: ' + best + "/" + R.QUESTIONS_PER_ROUND + "</span>" : "");
+        (best != null ? '<span class="level-best">Best: ' + best + "/" + R.QUESTIONS_PER_ROUND + "</span>" : "") +
+        (medal ? '<span class="level-medal" title="' + medal.name + ' medal">' + medal.icon + "</span>" : "");
       btn.addEventListener("click", function () { startLevel(lvl); });
       list.appendChild(btn);
     });
+    var won = Object.keys(progress.trophies).length;
+    $("trophy-count").textContent = "(" + won + "/" + A.TROPHIES.length + ")";
   }
 
   // ---------- Play ----------
@@ -68,6 +82,7 @@
     state.level = lvl;
     state.questionIndex = 0;
     state.score = 0;
+    state.newTrophies = [];
     $("sb-level").textContent = lvl.id + " · " + lvl.name;
     show("screen-play");
     nextQuestion();
@@ -131,11 +146,16 @@
     var fb = $("feedback");
     if (correct) {
       state.score++;
+      state.streak++;
+      progress.totalBaskets++;
       $("sb-score").textContent = state.score;
       fb.textContent = pick(["Swish! 🎉", "Nothing but net!", "Slam dunk!", "Great shot!"]);
       fb.className = "feedback good";
       shootBall(true);
+      celebrate(A.awardTrophies(progress, { streak: state.streak }));
+      saveProgress(progress);
     } else {
+      state.streak = 0;
       fb.textContent = "Missed! The answer is " + R.formatNumber(q.answer) + ".";
       fb.className = "feedback bad";
       shootBall(false);
@@ -146,6 +166,21 @@
     $("btn-next").textContent = last ? "See results →" : "Next shot →";
     $("btn-next").style.display = "";
     $("btn-next").focus();
+  }
+
+  // Show a pop-up for each new trophy and remember it for the results screen.
+  function celebrate(trophies) {
+    if (!trophies.length) return;
+    state.newTrophies = state.newTrophies.concat(trophies);
+    var toast = $("toast");
+    toast.innerHTML = trophies.map(function (t) {
+      return '<span class="toast-icon">' + t.icon + "</span> New trophy: <b>" + t.name + "</b>";
+    }).join("<br>");
+    toast.classList.remove("show");
+    void toast.offsetWidth;
+    toast.classList.add("show");
+    clearTimeout(celebrate.timer);
+    celebrate.timer = setTimeout(function () { toast.classList.remove("show"); }, 2800);
   }
 
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -197,13 +232,30 @@
     var lvl = state.level;
     var passed = state.score >= R.PASS_MARK;
     var prevBest = progress.best[lvl.id];
+    var prevMedal = A.medalFor(prevBest);
     if (prevBest == null || state.score > prevBest) progress.best[lvl.id] = state.score;
     var unlockedNew = false;
     if (passed && lvl.id === progress.unlocked && lvl.id < R.LEVELS.length) {
       progress.unlocked = lvl.id + 1;
       unlockedNew = true;
     }
+    var roundTrophies = A.awardTrophies(progress, { streak: state.streak, roundScore: state.score });
+    state.newTrophies = state.newTrophies.concat(roundTrophies);
     saveProgress(progress);
+
+    var medal = A.medalFor(state.score);
+    var medalText = "";
+    if (medal) {
+      var isNew = !prevMedal || medal.min > prevMedal.min;
+      medalText = '<span class="medal-big">' + medal.icon + "</span>" +
+        (isNew ? "You won a <b>" + medal.name + "</b> medal!" : medal.name + " medal");
+    }
+    $("result-medal").innerHTML = medalText;
+    $("result-new").innerHTML = state.newTrophies.length
+      ? "<h3>New trophies!</h3>" + state.newTrophies.map(function (t) {
+          return '<div class="new-trophy"><span>' + t.icon + "</span> " + t.name + "</div>";
+        }).join("")
+      : "";
 
     $("result-title").textContent = passed ? "Great game! 🏆" : "Good effort! 💪";
     $("result-score").textContent = state.score + " / " + R.QUESTIONS_PER_ROUND + " baskets";
@@ -218,6 +270,38 @@
     $("btn-next-level").style.display = hasNext ? "" : "none";
     show("screen-result");
   }
+
+  // ---------- Trophy room ----------
+  function renderTrophyRoom() {
+    var medals = $("medal-shelf");
+    medals.innerHTML = "";
+    R.LEVELS.forEach(function (lvl) {
+      var medal = A.medalFor(progress.best[lvl.id]);
+      var el = document.createElement("div");
+      el.className = "shelf-item" + (medal ? "" : " empty");
+      el.innerHTML =
+        '<span class="shelf-icon">' + (medal ? medal.icon : "🎯") + "</span>" +
+        '<span class="shelf-name">Level ' + lvl.id + "</span>" +
+        '<span class="shelf-desc">' + lvl.name + " · " + (lvl.mode === "pick" ? "pick" : "type") + "</span>" +
+        '<span class="shelf-desc">' + (medal ? medal.name : "No medal yet") + "</span>";
+      medals.appendChild(el);
+    });
+
+    var shelf = $("trophy-shelf");
+    shelf.innerHTML = "";
+    A.TROPHIES.forEach(function (t) {
+      var won = progress.trophies[t.id];
+      var el = document.createElement("div");
+      el.className = "shelf-item" + (won ? " won" : " empty");
+      el.innerHTML =
+        '<span class="shelf-icon">' + (won ? t.icon : "🔒") + "</span>" +
+        '<span class="shelf-name">' + t.name + "</span>" +
+        '<span class="shelf-desc">' + t.desc + "</span>";
+      shelf.appendChild(el);
+    });
+  }
+
+  function openTrophyRoom() { renderTrophyRoom(); show("screen-trophies"); }
 
   // ---------- Wiring ----------
   $("type-form").addEventListener("submit", function (e) {
@@ -240,6 +324,9 @@
 
   $("btn-quit").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-levels").addEventListener("click", function () { renderLevels(); show("screen-home"); });
+  $("btn-trophies").addEventListener("click", openTrophyRoom);
+  $("btn-result-trophies").addEventListener("click", openTrophyRoom);
+  $("btn-trophies-back").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-again").addEventListener("click", function () { startLevel(state.level); });
   $("btn-next-level").addEventListener("click", function () { startLevel(R.LEVELS[state.level.id]); });
 
