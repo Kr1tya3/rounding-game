@@ -4,7 +4,7 @@ A browser game for children aged 7 to 10 to practise rounding to the nearest ten
 
 ## Play locally
 
-Open `index.html` in a browser. There is no build step, so it can be served as-is from GitHub Pages.
+Play online at https://kr1tya3.github.io/rounding-game/, or open `index.html` in a browser. There is no build step.
 
 ## How it works
 
@@ -21,3 +21,9 @@ npm test
 ```
 
 The rounding and question logic lives in `js/rounding.js` and is tested with Node's built-in test runner.
+
+## Deployment
+
+Every push to `main` runs the tests and publishes the game to GitHub Pages at
+https://kr1tya3.github.io/rounding-game/ (see `.github/workflows/pages.yml`).
+One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
