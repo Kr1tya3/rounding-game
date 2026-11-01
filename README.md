@@ -15,7 +15,7 @@ Play online at https://kr1tya3.github.io/rounding-game/, or open `index.html` in
 - A Locker Room where players spend gold on gear, in tiers from Rookie (100–250) through Pro, All-Star and Legend (up to 10,000) for their avatar (jerseys, hats, glasses, shoes, extras). The avatar appears on the court as the shooter.
 - Medals for each level (bronze 7+, silver 9+, gold 10) and eleven trophies, all shown in the Trophy Room.
 - Speed bonus: a right answer always earns the full basket gold; answering quickly adds a bit extra (+50% "lightning", +25% "quick"). A calm bar shows the bonus time, and when it runs out nothing bad happens.
-- Time Trial (always unlocked): as many multiple-choice questions as you can get right in 60 seconds, drawn from the place values you have reached. 5 gold per right answer, +50 for a new personal best.
+- Time Trial (always unlocked): as many multiple-choice questions as you can get right in 60 seconds, drawn from the place values you have reached. 5 gold per right answer, +50 for a new personal best. Each wrong answer takes 5 seconds off the clock, so random tapping doesn't pay.
 - Each player gets a random funny name (e.g. "Bouncy Badger"), which they can re-roll or change in the Locker Room. No sign-up needed.
 - Progress is saved in the browser on that device (no accounts).
 

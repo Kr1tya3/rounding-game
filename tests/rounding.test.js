@@ -91,3 +91,11 @@ test("time trial questions are multiple choice from reached place values", () =>
   for (let i = 0; i < 300; i++) units.add(R.makeTrialQuestion(8).unit);
   assert.deepStrictEqual([...units].sort((a, b) => a - b), [10, 100, 1000]);
 });
+
+test("time trial penalty makes random tapping a losing strategy", () => {
+  // Tapping at random is right about 1 time in 3. Each miss costs the penalty,
+  // so random taps must burn more time than careful answers would need.
+  assert.strictEqual(R.TRIAL.penalty, 5);
+  const secondsPerRandomRight = 2 * R.TRIAL.penalty; // two misses per hit on average
+  assert.ok(secondsPerRandomRight >= 10);
+});

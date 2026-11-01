@@ -124,7 +124,9 @@
   // ---------- Time trial ----------
   // Always unlocked. Multiple-choice questions from the place values the
   // player has reached, as many as they can in 60 seconds.
-  var TRIAL = { seconds: 60, gold: 5, bestBonus: 50 };
+  // penalty = seconds taken off the clock for each wrong answer, so tapping
+  // randomly (right about 1 time in 3) loses time faster than it scores.
+  var TRIAL = { seconds: 60, gold: 5, bestBonus: 50, penalty: 5 };
 
   function makeTrialQuestion(unlocked, rand) {
     rand = rand || Math.random;

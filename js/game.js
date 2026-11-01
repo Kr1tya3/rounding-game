@@ -18,6 +18,7 @@
     qStart: 0,        // when the current question appeared (ms)
     speedGold: 0,     // speed bonus earned this round
     trialEnd: 0,      // when the time trial ends (ms)
+    trialMisses: 0,
     trialTimer: null,
     streak: 0,        // baskets in a row, carried across rounds
     newTrophies: []   // trophies won during the current round
@@ -201,6 +202,7 @@
     state.score = 0;
     state.newTrophies = [];
     state.trialEnd = performance.now() + R.TRIAL.seconds * 1000;
+    state.trialMisses = 0;
     $("sb-level").textContent = "Trial";
     $("sb-shot-label").textContent = "Time";
     $("sb-shot").textContent = "1:00";
@@ -229,8 +231,9 @@
     $("result-gold").innerHTML =
       '<div class="pay-row"><span>' + state.score + " right × " + R.TRIAL.gold + "</span><b>+" + R.formatNumber(trialGold) + "</b></div>" +
       (bestBonus ? '<div class="pay-row"><span>🎉 Personal best bonus</span><b>+' + bestBonus + "</b></div>" : "") +
+      (state.trialMisses ? '<div class="pay-row"><span>❌ ' + state.trialMisses + (state.trialMisses === 1 ? " miss" : " misses") + "</span><b>−" + (state.trialMisses * R.TRIAL.penalty) + "s</b></div>" : "") +
       '<div class="pay-row total"><span><span class="mini-coin" aria-hidden="true"></span> Gold earned</span><b>+' + R.formatNumber(trialGold + bestBonus) + "</b></div>";
-    $("result-msg").textContent = "Accuracy beats speed: a wrong answer costs you time, so think before you tap!";
+    $("result-msg").textContent = "Accuracy beats speed: every wrong answer takes " + R.TRIAL.penalty + " seconds off the clock, so think before you tap!";
     renderNewTrophies();
     $("btn-next-level").style.display = "none";
     show("screen-result");
@@ -271,8 +274,18 @@
       saveProgress(progress);
     } else {
       state.streak = 0;
-      fb.textContent = "Missed! The answer is " + R.formatNumber(q.answer) + ".";
+      fb.textContent = "Missed! The answer is " + R.formatNumber(q.answer) + "." +
+        (trial ? " −" + R.TRIAL.penalty + " seconds" : "");
       fb.className = "feedback bad";
+      if (trial) {
+        state.trialMisses++;
+        state.trialEnd -= R.TRIAL.penalty * 1000;
+        var pen = $("clock-penalty");
+        pen.textContent = "−" + R.TRIAL.penalty + "s";
+        pen.classList.remove("show");
+        void pen.offsetWidth;
+        pen.classList.add("show");
+      }
       shootBall(false);
       if (!trial) $("hint").innerHTML = numberLineHint(q);
     }
