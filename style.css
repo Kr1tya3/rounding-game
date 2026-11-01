@@ -404,3 +404,17 @@ h1 { font-size: 2rem; }
 .trial-sub { font-size: 0.9rem; opacity: 0.9; }
 .trial-best { display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
 .trial-best b { font-size: 1.6rem; letter-spacing: 0; }
+
+/* Time trial penalty flash */
+.clock { position: relative; }
+.clock-penalty {
+  position: absolute; right: 0; top: -22px; font-weight: 900; font-size: 1.3rem;
+  color: var(--bad); opacity: 0; pointer-events: none;
+}
+.clock-penalty.show { animation: penalty-pop 1s ease-out; }
+@keyframes penalty-pop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  20% { opacity: 1; transform: translateY(0) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-14px) scale(1); }
+}
+.clock.trial.penalised .clock-fill { background: var(--bad); }
