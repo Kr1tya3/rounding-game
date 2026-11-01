@@ -12,6 +12,7 @@ Play online at https://kr1tya3.github.io/rounding-game/, or open `index.html` in
 - Every basket earns 10 gold, shown in the coin counter at the top right.
 - Each round is 10 shots. Score 7 or more to unlock the next level.
 - A wrong answer shows a number line explaining which multiple is closer. Halfway numbers round up.
+- A Locker Room where players spend gold on gear for their avatar (jerseys, hats, glasses, shoes, extras). The avatar appears on the court as the shooter.
 - Medals for each level (bronze 7+, silver 9+, gold 10) and eleven trophies, all shown in the Trophy Room.
 - Progress is saved in the browser on that device (no accounts).
 

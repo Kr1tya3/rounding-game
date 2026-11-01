@@ -4,6 +4,7 @@
 
   var R = window.Rounding;
   var A = window.Achievements;
+  var AV = window.Avatar;
   var STORAGE_KEY = "roundingHoops.v1";
 
   var state = {
@@ -27,8 +28,10 @@
         p.totalBaskets = data.totalBaskets || 0;
         p.trophies = data.trophies || {};
         p.gold = data.gold || 0;
+        p.avatar = data.avatar;
       }
     } catch (e) { /* storage blocked or empty */ }
+    p.avatar = AV.normalise(p.avatar);
     return p;
   }
 
@@ -45,7 +48,7 @@
     var screens = document.querySelectorAll(".screen");
     for (var i = 0; i < screens.length; i++) screens[i].classList.remove("active");
     $(screenId).classList.add("active");
-    if (screenId !== "screen-play") $("toast").classList.remove("show");
+    $("toast").classList.remove("show");
     window.scrollTo(0, 0);
   }
 
@@ -190,15 +193,19 @@
   function celebrate(trophies) {
     if (!trophies.length) return;
     state.newTrophies = state.newTrophies.concat(trophies);
-    var toast = $("toast");
-    toast.innerHTML = trophies.map(function (t) {
+    showToast(trophies.map(function (t) {
       return '<span class="toast-icon">' + t.icon + "</span> New trophy: <b>" + t.name + "</b>";
-    }).join("<br>");
+    }).join("<br>"));
+  }
+
+  function showToast(html) {
+    var toast = $("toast");
+    toast.innerHTML = html;
     toast.classList.remove("show");
     void toast.offsetWidth;
     toast.classList.add("show");
-    clearTimeout(celebrate.timer);
-    celebrate.timer = setTimeout(function () { toast.classList.remove("show"); }, 2800);
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(function () { toast.classList.remove("show"); }, 2800);
   }
 
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -321,6 +328,113 @@
 
   function openTrophyRoom() { renderTrophyRoom(); show("screen-trophies"); }
 
+  // ---------- Avatar + locker room ----------
+  var locker = { slot: "jersey", tryOn: null };
+
+  function renderAvatars() {
+    var look = progress.avatar.look;
+    $("topbar-avatar").innerHTML = AV.svg(look, { viewBox: "26 4 48 48" });
+    $("court-player").innerHTML = AV.svg(look);
+  }
+
+  function lockerLook() {
+    var look = {};
+    for (var k in progress.avatar.look) look[k] = progress.avatar.look[k];
+    if (locker.tryOn) look[locker.tryOn.slot] = locker.tryOn.id;
+    return look;
+  }
+
+  function renderLocker() {
+    $("locker-avatar").innerHTML = AV.svg(lockerLook(), { className: "big-avatar" });
+
+    var tabs = $("slot-tabs");
+    tabs.innerHTML = "";
+    AV.SLOTS.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "slot-tab" + (s.id === locker.slot ? " active" : "");
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", s.id === locker.slot ? "true" : "false");
+      b.innerHTML = '<span aria-hidden="true">' + s.icon + "</span> " + s.name;
+      b.addEventListener("click", function () { locker.slot = s.id; locker.tryOn = null; renderLocker(); });
+      tabs.appendChild(b);
+    });
+
+    var grid = $("item-grid");
+    grid.innerHTML = "";
+    var slot = AV.SLOTS.filter(function (s) { return s.id === locker.slot; })[0];
+    var current = progress.avatar.look[slot.id];
+    if (slot.optional) grid.appendChild(itemCard(null, slot, current === null));
+    AV.itemsFor(slot.id).forEach(function (it) { grid.appendChild(itemCard(it, slot, current === it.id)); });
+  }
+
+  function itemCard(it, slot, wearing) {
+    var owned = !it || AV.owns(progress.avatar, it.id);
+    var trying = locker.tryOn && it && locker.tryOn.id === it.id;
+    var card = document.createElement("div");
+    card.className = "item-card" + (wearing ? " wearing" : "") + (trying ? " trying" : "") + (owned ? " owned" : "");
+
+    var pick = document.createElement("button");
+    pick.type = "button";
+    pick.className = "item-pick";
+    pick.innerHTML =
+      '<span class="item-preview">' + (it ? AV.itemPreview(it) : '<span class="none-mark">✕</span>') + "</span>" +
+      '<span class="item-name">' + (it ? it.name : "None") + "</span>";
+    pick.addEventListener("click", function () {
+      if (owned) {
+        AV.equip(progress.avatar, slot.id, it ? it.id : null);
+        locker.tryOn = null;
+        saveProgress(progress);
+        renderAvatars();
+      } else {
+        locker.tryOn = trying ? null : { slot: slot.id, id: it.id };
+      }
+      renderLocker();
+    });
+    card.appendChild(pick);
+
+    var foot = document.createElement("div");
+    foot.className = "item-foot";
+    if (wearing) {
+      foot.innerHTML = '<span class="tag wearing-tag">✔ Wearing</span>';
+    } else if (owned) {
+      foot.innerHTML = '<span class="tag">Tap to wear</span>';
+    } else {
+      var need = it.price - progress.gold;
+      var buyBtn = document.createElement("button");
+      buyBtn.type = "button";
+      buyBtn.className = "buy-btn";
+      buyBtn.disabled = need > 0;
+      buyBtn.innerHTML = '<span class="mini-coin" aria-hidden="true"></span>' + R.formatNumber(it.price);
+      buyBtn.setAttribute("aria-label", "Buy " + it.name + " for " + it.price + " gold");
+      buyBtn.addEventListener("click", function () {
+        var res = AV.buy(progress, it.id);
+        if (!res.ok) return;
+        locker.tryOn = null;
+        saveProgress(progress);
+        renderGold();
+        renderAvatars();
+        renderLocker();
+        showToast('<span class="toast-icon">🛍️</span> New gear: <b>' + it.name + "</b>");
+      });
+      foot.appendChild(buyBtn);
+      if (need > 0) {
+        var n = document.createElement("span");
+        n.className = "need";
+        n.textContent = "Need " + R.formatNumber(need) + " more";
+        foot.appendChild(n);
+      }
+    }
+    card.appendChild(foot);
+    return card;
+  }
+
+  function openLocker() {
+    locker.tryOn = null;
+    renderLocker();
+    show("screen-locker");
+  }
+
   // ---------- Wiring ----------
   $("type-form").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -343,6 +457,9 @@
   $("btn-quit").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-levels").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-trophies").addEventListener("click", openTrophyRoom);
+  $("btn-locker").addEventListener("click", openLocker);
+  $("btn-avatar").addEventListener("click", openLocker);
+  $("btn-locker-back").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-result-trophies").addEventListener("click", openTrophyRoom);
   $("btn-trophies-back").addEventListener("click", function () { renderLevels(); show("screen-home"); });
   $("btn-again").addEventListener("click", function () { startLevel(state.level); });
@@ -350,4 +467,5 @@
 
   renderLevels();
   renderGold();
+  renderAvatars();
 })();
