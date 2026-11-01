@@ -14,6 +14,7 @@
       <h1>Rounding Hoops <span aria-hidden="true">🏀</span></h1>
       <p class="lead">Round the number to score a basket! Score 7 out of 10 to unlock the next level.</p>
       <div id="level-list" class="level-list"></div>
+      <button id="btn-trophies" class="btn trophy-btn" type="button">🏆 Trophy Room <span id="trophy-count"></span></button>
     </section>
 
     <!-- Play -->
@@ -56,16 +57,32 @@
     <section id="screen-result" class="screen">
       <h2 id="result-title"></h2>
       <p id="result-score" class="result-score"></p>
+      <p id="result-medal" class="result-medal"></p>
       <p id="result-msg"></p>
+      <div id="result-new" class="result-new"></div>
       <div class="result-actions">
         <button id="btn-again" class="btn" type="button">Play again</button>
         <button id="btn-next-level" class="btn primary" type="button">Next level →</button>
         <button id="btn-levels" class="btn" type="button">All levels</button>
+        <button id="btn-result-trophies" class="btn" type="button">🏆 Trophy Room</button>
       </div>
     </section>
 
+    <!-- Trophy room -->
+    <section id="screen-trophies" class="screen">
+      <button id="btn-trophies-back" class="link-btn" type="button">← Levels</button>
+      <h2>Trophy Room 🏆</h2>
+      <h3 class="shelf-title">Medals</h3>
+      <div id="medal-shelf" class="shelf medal-shelf"></div>
+      <h3 class="shelf-title">Trophies</h3>
+      <div id="trophy-shelf" class="shelf trophy-shelf"></div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   </main>
   <script src="js/rounding.js"></script>
+  <script src="js/achievements.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>
