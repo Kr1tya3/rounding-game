@@ -16,6 +16,7 @@ Play online at https://kr1tya3.github.io/rounding-game/, or open `index.html` in
 - Medals for each level (bronze 7+, silver 9+, gold 10) and eleven trophies, all shown in the Trophy Room.
 - Speed bonus: a right answer always earns the full basket gold; answering quickly adds a bit extra (+50% "lightning", +25% "quick"). A calm bar shows the bonus time, and when it runs out nothing bad happens.
 - Time Trial (always unlocked): as many multiple-choice questions as you can get right in 60 seconds, drawn from the place values you have reached. 5 gold per right answer, +50 for a new personal best. Each wrong answer takes 5 seconds off the clock, so random tapping doesn't pay.
+- Player rank: Rookie 👟, Team Player 🏀, Hoop Hero 🔥, Basketball Star ⭐ and Legend 👑 (needs 0, 40, 55, 70 and 85 points). Each finished game (round or Time Trial) scores up to 100 points: 60 for accuracy (right answers out of answered) and 40 for gold earned in that game (full marks at 800 gold). The rank is the average over the last 10 games, so it can go down as well as up. See `js/ranks.js`.
 - Each player gets a random funny name (e.g. "Bouncy Badger"), which they can re-roll or change in the Locker Room. No sign-up needed.
 - Progress is saved in the browser on that device (no accounts).
 
