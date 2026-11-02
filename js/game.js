@@ -678,12 +678,19 @@
   $("type-form").addEventListener("submit", function (e) {
     e.preventDefault();
     if (state.answered) return;
-    var v = R.parseAnswer($("type-input").value);
-    if (v === null) {
-      $("feedback").textContent = "Type a number, then shoot!";
-      $("feedback").className = "feedback";
+    var input = $("type-input");
+    var problem = R.answerProblem(input.value);
+    if (problem) {
+      $("feedback").textContent = R.ANSWER_HELP[problem];
+      $("feedback").className = "feedback oops";
+      input.classList.remove("wiggle");
+      void input.offsetWidth;
+      input.classList.add("wiggle");
+      input.focus();
+      input.select();
       return;
     }
+    var v = R.parseAnswer(input.value);
     answer(v, null);
   });
 
