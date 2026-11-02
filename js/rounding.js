@@ -141,6 +141,26 @@
     return parseInt(cleaned, 10);
   }
 
+  // Why a typed answer can't be read, so the game can explain it kindly.
+  // Returns null when the answer is fine.
+  function answerProblem(text) {
+    var t = String(text).trim();
+    if (t === "") return "empty";
+    if (parseAnswer(t) !== null) return null;
+    if (/[a-z]/i.test(t)) return "letters";
+    if (/^-/.test(t)) return "minus";
+    if (/\d[.]\d/.test(t)) return "dot";
+    return "other";
+  }
+
+  var ANSWER_HELP = {
+    empty: "Type your answer in the box first, then shoot! 🏀",
+    letters: "Oops! Only numbers can go in the hoop. Use the number keys 0 to 9.",
+    minus: "No minus sign needed. Just type the number!",
+    dot: "Rounded answers are whole numbers, so no dot needed!",
+    other: "Oops! Only numbers can go in the hoop. Use the number keys 0 to 9."
+  };
+
   function formatNumber(n) {
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
@@ -157,6 +177,8 @@
     roundTo: roundTo,
     makeQuestion: makeQuestion,
     parseAnswer: parseAnswer,
+    answerProblem: answerProblem,
+    ANSWER_HELP: ANSWER_HELP,
     formatNumber: formatNumber
   };
 

@@ -445,3 +445,15 @@ h1 { font-size: 2rem; }
 .result-rank { text-align: center; margin: 10px 0; }
 .rank-line { color: var(--muted); }
 .rank-up { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+
+/* Friendly help when a typed answer isn't a number */
+.feedback.oops { color: var(--primary); font-size: 1.1rem; }
+.type-form input.wiggle { animation: wiggle 0.4s ease-in-out; border-color: var(--primary); }
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) { .type-form input.wiggle { animation: none; } }

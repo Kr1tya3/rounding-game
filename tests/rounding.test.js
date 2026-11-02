@@ -99,3 +99,17 @@ test("time trial penalty makes random tapping a losing strategy", () => {
   const secondsPerRandomRight = 2 * R.TRIAL.penalty; // two misses per hit on average
   assert.ok(secondsPerRandomRight >= 10);
 });
+
+test("typed answers that aren't numbers get a friendly reason", () => {
+  assert.strictEqual(R.answerProblem("450"), null);
+  assert.strictEqual(R.answerProblem("1,200"), null);
+  assert.strictEqual(R.answerProblem(" 70 "), null);
+  assert.strictEqual(R.answerProblem(""), "empty");
+  assert.strictEqual(R.answerProblem("   "), "empty");
+  assert.strictEqual(R.answerProblem("abc"), "letters");
+  assert.strictEqual(R.answerProblem("4o"), "letters");
+  assert.strictEqual(R.answerProblem("-50"), "minus");
+  assert.strictEqual(R.answerProblem("3.5"), "dot");
+  assert.strictEqual(R.answerProblem("50!"), "other");
+  for (const k of ["empty", "letters", "minus", "dot", "other"]) assert.ok(R.ANSWER_HELP[k]);
+});
